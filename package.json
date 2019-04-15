@@ -1,0 +1,23 @@
+{
+  "name": "cryptonews-server",
+  "version": "0.0.1",
+  "main": "server.js",
+  "repository": "https://github.com/roywalker/cryptonews-server.git",
+  "author": "Roy Walker",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^1.18.11",
+    "prettier": "^1.17.0"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "helmet": "^3.16.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "prettier": {
+    "singleQuote": true
+  }
+}
