@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db/db');
 
 router.get('/post/:post_id/', (req, res) => {
   return res.json(
