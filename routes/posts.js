@@ -1,29 +1,56 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../data/helpers/posts');
 
-router.get('/', (req, res) => {
-  // use query params for search
-  //return res.json(db.posts);
+router.get('/', async (req, res) => {
+  // TODO: use query params for search
+  const posts = await db.getPosts();
+  return res.json(posts);
 });
 
-router.get('/:id', (req, res) => {
-  //return res.json(db.posts[req.params.id]);
+router.get('/:id', async (req, res) => {
+  const [post] = await db.getPost(req.params.id);
+
+  if (!post) {
+    return res.status(404).json({ error: 'Post not Found' });
+  }
+
+  return res.json(post);
 });
 
-router.get('/:post_id/comments', (req, res) => {
-  // return res.json(
-  //   db.comments.filter(
-  //     comment => comment.post_id === parseInt(req.params.post_id)
-  //   )
-  // );
+router.get('/:postId/comments', async (req, res) => {
+  const [post] = await db.getPost(req.params.postId);
+
+  // validates post id
+  if (!post) {
+    return res.status(404).json({ error: "Post doesn't exist" });
+  }
+
+  const comments = await db.getPostComments(req.params.postId);
+  return res.json(comments);
 });
 
-router.post('/', (req, res) => {
-  // adds a new post
+router.post('/', async (req, res) => {
+  const newPost = {
+    title: req.body.title,
+    url: req.body.url,
+    authorId: 1 // TODO: get author by AUTH params
+  };
+
+  const [id] = await db.addPost(newPost);
+  const post = await db.getPost(id);
+
+  return res.status(201).json(post);
 });
 
-router.delete('/', (req, res) => {
-  // deletes a post
+router.delete('/:postId', async (req, res) => {
+  const post = await db.deletePost(req.params.postId);
+
+  if (!post) {
+    return res.status(404).json({ error: "Post doesn't exist" });
+  }
+
+  return res.status(204).json();
 });
 
 // updates a post
