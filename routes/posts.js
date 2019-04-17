@@ -31,6 +31,7 @@ router.get('/:postId/comments', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+  // TODO: validate fields
   const newPost = {
     title: req.body.title,
     url: req.body.url,
@@ -44,6 +45,7 @@ router.post('/', async (req, res) => {
 });
 
 router.delete('/:postId', async (req, res) => {
+  // TODO: validate author with AUTH id
   const post = await db.deletePost(req.params.postId);
 
   if (!post) {
