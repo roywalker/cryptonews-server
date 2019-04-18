@@ -16,7 +16,7 @@ exports.up = function(knex, Promise) {
       .unsigned()
       .references('id')
       .inTable('comments');
-    table.datetime('date').defaultTo(knex.fn.now());
+    table.timestamp('date').defaultTo(new Date().toISOString());
   });
 };
 

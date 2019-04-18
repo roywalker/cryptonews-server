@@ -9,7 +9,7 @@ exports.up = function(knex, Promise) {
       .unsigned()
       .references('id')
       .inTable('users');
-    table.datetime('date').defaultTo(knex.fn.now());
+    table.timestamp('date').defaultTo(new Date().toISOString());
   });
 };
 

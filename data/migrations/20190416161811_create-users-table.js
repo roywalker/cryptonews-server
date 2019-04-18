@@ -4,7 +4,7 @@ exports.up = function(knex, Promise) {
     table.string('username', 24).notNullable();
     table.string('password', 128).notNullable();
     table.string('role', 32).notNullable();
-    table.datetime('date').defaultTo(knex.fn.now());
+    table.timestamp('date').defaultTo(new Date().toISOString());
   });
 };
 

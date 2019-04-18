@@ -5,6 +5,8 @@ const db = knex(knexConfig);
 module.exports = {
   getPosts: () => {
     return db('posts');
+    //.offset(skip)
+    //.limit(pageSize);
   },
   getPost: id => {
     return db('posts').where({ id });

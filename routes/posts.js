@@ -4,9 +4,19 @@ const db = require('../data/helpers/posts');
 const { body, param, validationResult } = require('express-validator/check');
 
 router.get('/', async (req, res) => {
-  // TODO: use query params for search
+  // TODO: add pagination thorugh query params
   const posts = await db.getPosts();
-  return res.json(posts);
+  const formattedPosts = posts.map(post => {
+    post.link = `/api/posts/${post.id}`;
+    return post;
+  });
+
+  return res.json({
+    count: posts.length,
+    next: null,
+    previous: null,
+    results: formattedPosts
+  });
 });
 
 router.get('/:id', async (req, res) => {
@@ -14,19 +24,28 @@ router.get('/:id', async (req, res) => {
   if (!post) {
     return res.status(404).json({ error: 'Post not Found' });
   }
+  post.link = `/api/posts/${post.id}`;
 
   return res.json(post);
 });
 
 router.get('/:postId/comments', async (req, res) => {
+  // TODO: add pagination
   // validates post id first
   const [post] = await db.getPost(req.params.postId);
   if (!post) {
     return res.status(404).json({ error: "Post doesn't exist" });
   }
+  post.link = `/api/posts/${post.id}`;
 
   const comments = await db.getPostComments(req.params.postId);
-  return res.json(comments);
+  return res.json({
+    post_reference_link: post.link,
+    count: comments.length,
+    next: null,
+    previous: null,
+    results: comments
+  });
 });
 
 // prettier-ignore
@@ -35,7 +54,7 @@ router.post('/', [
       .isLength({ min: 5, max: 128 }).trim().escape()
       .withMessage('You must include a post title.'),
     body('url')
-      .isURL().trim().escape()
+      .isURL().trim()
       .withMessage('You must include a valid URL.')
   ],
   async (req, res) => {
