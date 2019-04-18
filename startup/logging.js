@@ -21,9 +21,11 @@ module.exports = function() {
 
   if (process.env.NODE_ENV !== 'production') {
     logger.add(
-      new winston.transports.Console({
-        format: winston.format.simple()
-      })
+      new winston.transports.Console({ format: winston.format.simple() })
+    );
+
+    winston.exceptions.handle(
+      new winston.transports.Console({ format: winston.format.simple() })
     );
   }
 };
