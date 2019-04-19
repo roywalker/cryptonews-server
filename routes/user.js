@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // prettier-ignore
-router.post('/',[
+router.post('/signup',[
     body('username')
       .matches(/^[a-zA-Z0-9]\w*[a-zA-Z0-9]$/i)
       .withMessage(
@@ -32,8 +32,8 @@ router.post('/',[
 
     // checks if username is taken
     const username = req.body.username.toLowerCase();
-    const [usernameInUse] = await db.getUserByUsername(username);
-    if (usernameInUse) {
+    const [userExists] = await db.getUserByUsername(username);
+    if (userExists) {
       return res.status(422).json({ error: 'Username taken.' });
     }
 
@@ -54,12 +54,45 @@ router.post('/',[
 
     // returns token details
     res.status(201).json({
-      success: 'User created',
+      success: 'User created.',
       username: username,
       token: token
     });
   }
 );
+
+router.post('/login', async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  // checks for username
+  const [userExists] = await db.getUserByUsername(username);
+  if (!userExists) {
+    return res.status(401).json({ error: 'Username not found.' });
+  }
+
+  // checks for password match
+  const passwordMatch = bcrypt.compareSync(password, userExists.password);
+  if (!passwordMatch) {
+    return res
+      .status(401)
+      .json({ error: `Incorrect password for username '${username}'.` });
+  }
+
+  // creates auth token
+  const token = await jwt.sign(
+    { user: userExists.id },
+    process.env.JWT_SECRET,
+    { expiresIn: '14d' }
+  );
+
+  // returns token details
+  res.status(200).json({
+    success: 'Authorization granted.',
+    username: username,
+    token: token
+  });
+});
 
 router.delete('/', (req, res) => {
   // deletes a user
