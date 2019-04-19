@@ -29,6 +29,8 @@ router.get('/:id', async (req, res) => {
   }
   post.link = `/api/posts/${post.id}`;
 
+  // TODO: get comments from post
+
   return res.json(post);
 });
 
