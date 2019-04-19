@@ -4,7 +4,7 @@ const db = require('../data/helpers/posts');
 const { body, param, validationResult } = require('express-validator/check');
 
 router.get('/', async (req, res) => {
-  // TODO: add pagination thorugh query params
+  // TODO: add pagination (query params)
   const posts = await db.getPosts();
   const formattedPosts = posts.map(post => {
     post.link = `/api/posts/${post.id}`;
@@ -30,7 +30,7 @@ router.get('/:id', async (req, res) => {
 });
 
 router.get('/:postId/comments', async (req, res) => {
-  // TODO: add pagination
+  // TODO: add pagination (query params)
   // validates post id first
   const [post] = await db.getPost(req.params.postId);
   if (!post) {
