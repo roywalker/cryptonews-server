@@ -4,7 +4,6 @@ exports.seed = function(knex, Promise) {
     .then(function() {
       return knex('comments').insert([
         {
-          id: 1,
           authorId: 2,
           postId: 1,
           comment: `Hitchhikers Guide was one of the first PC games I ever got. I had no idea it was a “text adventure.” Nor did I understand it was based on a book.
@@ -13,13 +12,11 @@ exports.seed = function(knex, Promise) {
           `
         },
         {
-          id: 2,
           authorId: 3,
           postId: 1,
           comment: `I love interactive fiction (as these types of games are now denoted) then and now. In principle. There are possibilities with the text-only canvas that are not even conceivable in other media.`
         },
         {
-          id: 3,
           authorId: 2,
           postId: 2,
           comment: `Is there any good modern analogue to Infocom games that I can plan on my iPhone slowly?`
