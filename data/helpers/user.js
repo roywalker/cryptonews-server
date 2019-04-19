@@ -8,7 +8,10 @@ module.exports = {
       .insert(user)
       .returning('id');
   },
-  getUser: id => {
-    return dbW('users').where({ id });
+  getUserById: id => {
+    return db('users').where({ id });
+  },
+  getUserByUsername: username => {
+    return db('users').where({ username });
   }
 };
