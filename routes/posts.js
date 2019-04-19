@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../data/helpers/posts');
 const { body, param, validationResult } = require('express-validator/check');
+const auth = require('../middleware/auth');
 
 router.get('/', async (req, res) => {
   // TODO: add pagination (query params)
@@ -54,7 +55,7 @@ router.get('/:postId/comments', async (req, res) => {
 });
 
 // prettier-ignore
-router.post('/', [
+router.post('/', auth, [
     body('title')
       .isLength({ min: 5, max: 128 }).trim().escape()
       .withMessage('Should contain between 5 and 128 characters.'),
@@ -72,7 +73,7 @@ router.post('/', [
     const newPost = {
       title: req.body.title,
       url: req.body.url,
-      authorId: 1 // TODO: get author by AUTH params
+      authorId: req.headers.user
     };
 
     // adds posts into db and retrieves post details
