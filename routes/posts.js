@@ -86,7 +86,7 @@ router.post('/', auth, [
 );
 
 // prettier-ignore
-router.delete('/:postId', [
+router.delete('/:postId', auth, [
     param('postId').isInt().withMessage('Invalid ID.')
   ],
   async (req, res) => {
@@ -96,13 +96,19 @@ router.delete('/:postId', [
       return res.status(422).json({ errors: errors.array() });
     }
 
-    // TODO: validate author with AUTH id
-    // tries to delete post from db
-    const post = await db.deletePost(req.params.postId);
-
+    // verifies post existence
+    const [post] = await db.getPost(req.params.postId);
     if (!post) {
-      return res.status(404).json({ error: "Post doesn't exist" });
+      return res.status(404).json({ error: "Post doesn't exist." });
     }
+
+    // verifies ownership
+    if (req.headers.user !== post.authorId) {
+      return res.status(401).json({error: "You do not have authorization to delete this post."})
+    }
+
+    // deletes posts from db
+    await db.deletePost(req.params.postId);
 
     // sends empty response (success)
     return res.status(204).json();
