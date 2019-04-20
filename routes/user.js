@@ -94,12 +94,4 @@ router.post('/login', async (req, res) => {
   });
 });
 
-router.delete('/', (req, res) => {
-  // deletes a user
-});
-
-router.put('/', (req, res) => {
-  // updates user password
-});
-
 module.exports = router;
