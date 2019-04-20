@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../data/helpers/posts');
 const { body, param, validationResult } = require('express-validator/check');
 const auth = require('../middleware/auth');
+const slugify = require('../helpers/slugify');
 
 router.get('/', async (req, res) => {
   // TODO: add pagination (query params)
@@ -23,7 +24,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  const [post] = await db.getPost(req.params.id);
+  const [post] = await db.getPostById(req.params.id);
   if (!post) {
     return res.status(404).json({ error: 'Post not Found' });
   }
@@ -37,7 +38,7 @@ router.get('/:id', async (req, res) => {
 router.get('/:postId/comments', async (req, res) => {
   // TODO: add pagination (query params)
   // validates post id first
-  const [post] = await db.getPost(req.params.postId);
+  const [post] = await db.getPostById(req.params.postId);
   if (!post) {
     return res.status(404).json({ error: "Post doesn't exist" });
   }
@@ -71,16 +72,31 @@ router.post('/', auth, [
       return res.status(422).json({ errors: errors.array() });
     }
 
+    // creates new url slug
+    let urlSlug = req.body.title;
+    let validSlug = false;
+    while (!validSlug) {
+      urlSlug = slugify(urlSlug);
+      const [slugExists] = await db.getPostByUrlSlug(urlSlug);
+      
+      if (slugExists) {
+        urlSlug += `-${Math.floor(Math.random()*100000)}`;
+      } else {
+        break;
+      }
+    }
+
     // creates post object
     const newPost = {
       title: req.body.title,
       url: req.body.url,
-      authorId: req.headers.user
+      authorId: req.headers.user,
+      localUrlSlug: urlSlug
     };
 
     // adds posts into db and retrieves post details
     const [id] = await db.addPost(newPost);
-    const post = await db.getPost(id);
+    const post = await db.getPostById(id);
 
     // returns post details
     return res.status(201).json(post);
@@ -99,7 +115,7 @@ router.delete('/:postId', auth, [
     }
 
     // verifies post existence
-    const [post] = await db.getPost(req.params.postId);
+    const [post] = await db.getPostById(req.params.postId);
     if (!post) {
       return res.status(404).json({ error: "Post doesn't exist." });
     }
