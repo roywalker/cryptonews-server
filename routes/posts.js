@@ -110,7 +110,7 @@ router.delete('/:postId', auth, [
 
     // verifies ownership
     if (req.headers.user !== post.authorId) {
-      return res.status(401).json({error: "You do not have authorization to delete this post."})
+      return res.status(401).json({error: "You do not have authorization to delete this post."});
     }
 
     // deletes posts from db
