@@ -10,8 +10,9 @@ router.get('/', async (req, res) => {
   // gets posts and adds static link
   const posts = await db.getPosts();
   const formattedPosts = posts.map(post => {
-    post.localUrl = `/posts/${post.localUrl}`;
-    return post;
+    const newPost = Object.assign({}, post);
+    newPost.localUrl = `/posts/${post.localUrl}`;
+    return newPost;
   });
 
   // returns metadata and posts list
@@ -54,6 +55,7 @@ router.post('/', auth, [
       .withMessage('Should be a valid URL.')
   ],
   async (req, res) => {
+    // validates format
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });

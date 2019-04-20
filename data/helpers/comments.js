@@ -3,16 +3,8 @@ const knexConfig = require('../../knexfile');
 const db = knex(knexConfig);
 
 module.exports = {
-  getCommentsByAuthor: authorUsername => {
-    return db('users')
-      .join('comments', 'users.id', 'comments.authorId')
-      .select(
-        'comments.id',
-        'comments.postId as post_url',
-        'comments.comment',
-        'comments.date'
-      )
-      .where({ username: authorUsername });
+  getCommentById: id => {
+    return db('comments').where({ id });
   },
   addComment: comment => {
     return db('comments')
@@ -23,5 +15,17 @@ module.exports = {
     return db('comments')
       .where({ id })
       .del();
+  },
+  getCommentsByAuthor: username => {
+    return db('users')
+      .join('comments', 'users.id', 'comments.authorId')
+      .join('posts', 'comments.postId', 'posts.id')
+      .select(
+        'comments.id',
+        'posts.localUrl as postUrl',
+        'comments.comment',
+        'comments.date'
+      )
+      .where({ username });
   }
 };
