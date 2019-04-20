@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     return newPost;
   });
 
-  // returns metadata and posts list
+  // sends metadata and posts list
   return res.json({
     count: posts.length,
     next: null,
@@ -87,7 +87,7 @@ router.post('/', auth, [
     const [id] = await db.addPost(newPost);
     const post = await db.getPostById(id);
 
-    // returns post details
+    // sends post details
     return res.status(201).json(post);
   }
 );
