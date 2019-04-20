@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const router = express.Router();
-const db = require('../data/helpers/user');
+const { dbuser } = require('../data/helpers/db');
 const { body, validationResult } = require('express-validator/check');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -32,7 +32,7 @@ router.post('/signup',[
 
     // checks if username is taken
     const username = req.body.username.toLowerCase();
-    const [userExists] = await db.getUserByUsername(username);
+    const [userExists] = await dbuser.getUserByUsername(username);
     if (userExists) {
       return res.status(422).json({ error: 'Username taken.' });
     }
@@ -45,7 +45,7 @@ router.post('/signup',[
     };
 
     // adds user to db
-    const [id] = await db.addUser(newUser);
+    const [id] = await dbuser.addUser(newUser);
 
     // creates auth token
     const token = await jwt.sign({ user: id }, process.env.JWT_SECRET, {
@@ -66,7 +66,7 @@ router.post('/login', async (req, res) => {
   const password = req.body.password;
 
   // checks for username
-  const [userExists] = await db.getUserByUsername(username);
+  const [userExists] = await dbuser.getUserByUsername(username);
   if (!userExists) {
     return res.status(401).json({ error: 'Username not found.' });
   }

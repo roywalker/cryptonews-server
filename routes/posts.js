@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../data/helpers/posts');
+const { dbposts } = require('../data/helpers/db');
 const { body, param, validationResult } = require('express-validator/check');
 const auth = require('../middleware/auth');
 const slugify = require('../helpers/slugify');
@@ -8,7 +8,7 @@ const slugify = require('../helpers/slugify');
 router.get('/', async (req, res) => {
   // TODO: add pagination (query params)
   // gets posts and adds static link
-  const posts = await db.getPosts();
+  const posts = await dbposts.getPosts();
   const formattedPosts = posts.map(post => {
     const newPost = { ...post, localUrl: `/posts/${post.localUrl}` };
     return newPost;
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:localUrl', async (req, res) => {
   // validates post and adds static link
-  const [post] = await db.getPostByUrlSlug(req.params.localUrl);
+  const [post] = await dbposts.getPostByUrlSlug(req.params.localUrl);
   if (!post) {
     return res.status(404).json({ error: 'Post not found.' });
   }
@@ -33,7 +33,7 @@ router.get('/:localUrl', async (req, res) => {
 
   // TODO: add pagination (query params)
   // gets post comments
-  const comments = await db.getPostComments(post.id);
+  const comments = await dbposts.getPostComments(post.id);
   post.comments = {
     count: comments.length,
     next: null,
@@ -65,7 +65,7 @@ router.post('/', auth, [
     let validSlug = false;
     while (!validSlug) {
       urlSlug = slugify(urlSlug);
-      const [slugExists] = await db.getPostByUrlSlug(urlSlug);
+      const [slugExists] = await dbposts.getPostByUrlSlug(urlSlug);
       
       if (slugExists) {
         urlSlug += `-${Math.floor(Math.random()*100000)}`;
@@ -83,8 +83,8 @@ router.post('/', auth, [
     };
 
     // adds posts into db and retrieves post details
-    const [id] = await db.addPost(newPost);
-    const post = await db.getPostById(id);
+    const [id] = await dbposts.addPost(newPost);
+    const post = await dbposts.getPostById(id);
 
     // sends post details
     return res.status(201).json(post);
@@ -103,7 +103,7 @@ router.delete('/:postId', auth, [
     }
 
     // verifies post existence
-    const [post] = await db.getPostById(req.params.postId);
+    const [post] = await dbposts.getPostById(req.params.postId);
     if (!post) {
       return res.status(404).json({ error: "Post doesn't exist." });
     }
@@ -114,7 +114,7 @@ router.delete('/:postId', auth, [
     }
 
     // deletes posts from db
-    await db.deletePost(req.params.postId);
+    await dbposts.deletePost(req.params.postId);
 
     // sends empty response (success)
     return res.status(204).json();

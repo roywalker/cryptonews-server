@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const dbposts = require('../data/helpers/posts');
-const dbcomments = require('../data/helpers/comments');
-const dbupvotes = require('../data/helpers/upvotes');
+const { dbposts, dbcomments, dbupvotes } = require('../data/helpers/db');
 const { param, validationResult } = require('express-validator/check');
 const auth = require('../middleware/auth');
 
