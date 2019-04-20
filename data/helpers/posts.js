@@ -11,8 +11,8 @@ module.exports = {
   getPostById: id => {
     return db('posts').where({ id });
   },
-  getPostByUrlSlug: localUrlSlug => {
-    return db('posts').where({ localUrlSlug });
+  getPostByUrlSlug: localUrl => {
+    return db('posts').where({ localUrl });
   },
   getPostComments: postId => {
     return db('comments').where({ postId });

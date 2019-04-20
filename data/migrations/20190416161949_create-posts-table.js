@@ -10,7 +10,7 @@ exports.up = function(knex, Promise) {
       .references('id')
       .inTable('users');
     table
-      .string('localUrlSlug')
+      .string('localUrl')
       .unique()
       .notNullable();
     table.timestamp('date').defaultTo(new Date().toISOString());

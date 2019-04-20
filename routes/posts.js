@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
   // gets posts and adds static link
   const posts = await db.getPosts();
   const formattedPosts = posts.map(post => {
-    post.link = `/api/posts/${post.id}`;
+    post.localUrl = `/posts/${post.localUrl}`;
     return post;
   });
 
@@ -23,38 +23,25 @@ router.get('/', async (req, res) => {
   });
 });
 
-router.get('/:id', async (req, res) => {
-  const [post] = await db.getPostById(req.params.id);
+router.get('/:localUrl', async (req, res) => {
+  // validates post and adds static link
+  const [post] = await db.getPostByUrlSlug(req.params.localUrl);
   if (!post) {
-    return res.status(404).json({ error: 'Post not Found' });
+    return res.status(404).json({ error: 'Post not found.' });
   }
-  post.link = `/api/posts/${post.id}`;
+  post.localUrl = `/posts/${post.localUrl}`;
 
-  // TODO: get comments from post
-
-  return res.json(post);
-});
-
-router.get('/:postId/comments', async (req, res) => {
   // TODO: add pagination (query params)
-  // validates post id first
-  const [post] = await db.getPostById(req.params.postId);
-  if (!post) {
-    return res.status(404).json({ error: "Post doesn't exist" });
-  }
-  post.link = `/api/posts/${post.id}`;
-
-  // brings comments from db
-  const comments = await db.getPostComments(req.params.postId);
-
-  // returns metadata and comments list
-  return res.json({
-    post_reference_link: post.link,
+  // gets post comments
+  const comments = await db.getPostComments(post.id);
+  post.comments = {
     count: comments.length,
     next: null,
     previous: null,
     results: comments
-  });
+  };
+
+  return res.json(post);
 });
 
 // prettier-ignore
@@ -72,7 +59,7 @@ router.post('/', auth, [
       return res.status(422).json({ errors: errors.array() });
     }
 
-    // creates new url slug
+    // creates url slug
     let urlSlug = req.body.title;
     let validSlug = false;
     while (!validSlug) {
@@ -91,7 +78,7 @@ router.post('/', auth, [
       title: req.body.title,
       url: req.body.url,
       authorId: req.headers.user,
-      localUrlSlug: urlSlug
+      localUrl: urlSlug
     };
 
     // adds posts into db and retrieves post details
