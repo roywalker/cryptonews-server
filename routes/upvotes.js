@@ -4,10 +4,8 @@ const { dbposts, dbcomments, dbupvotes } = require('../data/helpers/db');
 const { param, validationResult } = require('express-validator/check');
 const auth = require('../middleware/auth');
 
-router.post(
-  '/:type/:contentId',
-  auth,
-  [
+// prettier-ignore
+router.post('/:type/:contentId', auth, [
     param('contentId')
       .isInt()
       .withMessage('Invalid ID.'),
@@ -16,9 +14,8 @@ router.post(
   async (req, res) => {
     // validates format
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(422).json({ errors: errors.array() });
-    }
 
     const type = req.params.type.toLowerCase();
 
@@ -30,16 +27,13 @@ router.post(
     if (type === 'post') {
       // validates post existence
       const [post] = await dbposts.getPostById(req.params.contentId);
-      if (!post) {
-        return res.status(404).json({ error: 'Post not found.' });
-      }
+      if (!post) return res.status(404).json({ error: 'Post not found.' });
       upvote.postId = post.id;
     } else if (type === 'comment') {
       // validates comment existence
       const [comment] = await dbcomments.getCommentById(req.params.contentId);
-      if (!comment) {
+      if (!comment)
         return res.status(404).json({ error: 'Comment not found.' });
-      }
       upvote.commentId = comment.id;
     }
 

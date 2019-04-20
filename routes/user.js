@@ -26,26 +26,23 @@ router.post('/signup',[
   async (req, res) => {
     // validates format
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(422).json({ errors: errors.array() });
-    }
 
     // checks if username is taken
     const username = req.body.username.toLowerCase();
     const [userExists] = await dbuser.getUserByUsername(username);
-    if (userExists) {
+    if (userExists)
       return res.status(422).json({ error: 'Username taken.' });
-    }
 
-    // creates user object
+    // hashes password
     const hash = await bcrypt.hashSync(req.body.password, 10);
-    const newUser = {
-      username: username,
-      password: hash
-    };
 
     // adds user to db
-    const [id] = await dbuser.addUser(newUser);
+    const [id] = await dbuser.addUser({
+      username: username,
+      password: hash
+    });
 
     // creates auth token
     const token = await jwt.sign({ user: id }, process.env.JWT_SECRET, {
@@ -62,14 +59,12 @@ router.post('/signup',[
 );
 
 router.post('/login', async (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
+  const { username, password } = req.body;
 
   // checks for username
   const [userExists] = await dbuser.getUserByUsername(username);
-  if (!userExists) {
+  if (!userExists)
     return res.status(401).json({ error: 'Username not found.' });
-  }
 
   // checks for password match
   const passwordMatch = bcrypt.compareSync(password, userExists.password);

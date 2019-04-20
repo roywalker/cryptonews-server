@@ -29,10 +29,7 @@ router.get('/', async (req, res) => {
 router.get('/:localUrl', async (req, res) => {
   // validates post and adds static link
   const [post] = await dbposts.getPostByUrlSlug(req.params.localUrl);
-  if (!post) {
-    return res.status(404).json({ error: 'Post not found.' });
-  }
-  post.localUrl = `/posts/${post.localUrl}`;
+  if (!post) return res.status(404).json({ error: 'Post not found.' });
 
   // TODO: add pagination (query params)
   // gets post comments
@@ -50,18 +47,20 @@ router.get('/:localUrl', async (req, res) => {
 // prettier-ignore
 router.post('/', auth, [
     body('title')
-      .isLength({ min: 5, max: 128 }).trim().escape()
+      .isLength({ min: 5, max: 128 })
+      .trim()
+      .escape()
       .withMessage('Should contain between 5 and 128 characters.'),
     body('url')
-      .isURL().trim()
+      .isURL()
+      .trim()
       .withMessage('Should be a valid URL.')
   ],
   async (req, res) => {
     // validates format
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(422).json({ errors: errors.array() });
-    }
 
     // creates url slug
     let urlSlug = req.body.title;
@@ -69,24 +68,21 @@ router.post('/', auth, [
     while (!validSlug) {
       urlSlug = slugify(urlSlug);
       const [slugExists] = await dbposts.getPostByUrlSlug(urlSlug);
-      
+
       if (slugExists) {
-        urlSlug += `-${Math.floor(Math.random()*100000)}`;
+        urlSlug += `-${Math.floor(Math.random() * 100000)}`;
       } else {
         break;
       }
     }
 
-    // creates post object
-    const newPost = {
+    // adds posts into db and retrieves post details
+    const [id] = await dbposts.addPost({
       title: req.body.title,
       url: req.body.url,
       authorId: req.headers.user,
       localUrl: urlSlug
-    };
-
-    // adds posts into db and retrieves post details
-    const [id] = await dbposts.addPost(newPost);
+    });
     const post = await dbposts.getPostById(id);
 
     // sends post details
@@ -101,20 +97,17 @@ router.delete('/:postId', auth, [
   async (req, res) => {
     // validates format
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(422).json({ errors: errors.array() });
-    }
 
     // verifies post existence
     const [post] = await dbposts.getPostById(req.params.postId);
-    if (!post) {
+    if (!post)
       return res.status(404).json({ error: "Post doesn't exist." });
-    }
 
     // verifies ownership
-    if (req.headers.user !== post.authorId) {
+    if (req.headers.user !== post.authorId)
       return res.status(401).json({error: "You do not have authorization to delete this post."});
-    }
 
     // deletes posts from db
     await dbposts.deletePost(req.params.postId);

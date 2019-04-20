@@ -18,25 +18,19 @@ router.post('/', auth, [
   async (req, res) => {
     // validates format
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(422).json({ errors: errors.array() });
-    }
 
     // validates post existence
     const [post] = await dbposts.getPostById(req.body.postId);
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found.' });
-    }
+    if (!post) return res.status(404).json({ error: 'Post not found.' });
 
-    // creates comment object
-    const newComment = {
+    // adds comment into db
+    const [comment] = await dbcomments.addComment({
       authorId: req.headers.user,
       postId: req.body.postId,
       comment: req.body.comment
-    };
-
-    // adds comment into db
-    const [comment] = await dbcomments.addComment(newComment);
+    });
     const addedComment = await dbcomments.getCommentById(comment);
 
     // returns comment from db
@@ -45,23 +39,19 @@ router.post('/', auth, [
 );
 
 // prettier-ignore
-router.delete('/:commentId', auth,[
+router.delete('/:commentId', auth, [
     param('commentId')
       .isInt()
       .withMessage('Invalid ID.')
   ],
   async (req, res) => {
-    // validates format
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(422).json({ errors: errors.array() });
-    }
 
     // verifies comment existence
     const [comment] = await dbcomments.getCommentById(req.params.commentId);
-    if (!comment) {
-      return res.status(404).json({ error: 'Comment not found.' });
-    }
+    if (!comment) return res.status(404).json({ error: 'Comment not found.' });
 
     // verifies comment ownership
     if (req.headers.user !== comment.authorId) {
@@ -82,16 +72,11 @@ router.get('/author/:username/', async (req, res) => {
   // checks if user exists
   const username = req.params.username.toLowerCase();
   const [userExists] = await dbuser.getUserByUsername(username);
-  if (!userExists) {
+  if (!userExists)
     return res.status(404).json({ error: `User doesn't exist.` });
-  }
 
   // gets comments from user and adds post url
   const comments = await dbcomments.getCommentsByAuthor(username);
-  const formattedComments = comments.map(comment => {
-    const newComment = { ...comment, postUrl: `/posts/${comment.postUrl}` };
-    return newComment;
-  });
 
   // returns metadata and comments list
   return res.json({
@@ -99,7 +84,7 @@ router.get('/author/:username/', async (req, res) => {
     count: comments.length,
     next: null,
     previous: null,
-    results: formattedComments
+    results: comments
   });
 });
 
