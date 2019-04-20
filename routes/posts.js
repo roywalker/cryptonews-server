@@ -10,8 +10,7 @@ router.get('/', async (req, res) => {
   // gets posts and adds static link
   const posts = await db.getPosts();
   const formattedPosts = posts.map(post => {
-    const newPost = Object.assign({}, post);
-    newPost.localUrl = `/posts/${post.localUrl}`;
+    const newPost = { ...post, localUrl: `/posts/${post.localUrl}` };
     return newPost;
   });
 
