@@ -9,6 +9,10 @@ exports.up = function(knex, Promise) {
       .unsigned()
       .references('id')
       .inTable('users');
+    table
+      .string('localUrlSlug')
+      .unique()
+      .notNullable();
     table.timestamp('date').defaultTo(new Date().toISOString());
   });
 };

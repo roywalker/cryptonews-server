@@ -8,8 +8,11 @@ module.exports = {
     //.offset(skip)
     //.limit(pageSize);
   },
-  getPost: id => {
+  getPostById: id => {
     return db('posts').where({ id });
+  },
+  getPostByUrlSlug: localUrlSlug => {
+    return db('posts').where({ localUrlSlug });
   },
   getPostComments: postId => {
     return db('comments').where({ postId });
