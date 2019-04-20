@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { dbposts } = require('../data/helpers/db');
+const { dbposts, dbupvotes } = require('../data/helpers/db');
 const { body, param, validationResult } = require('express-validator/check');
 const auth = require('../middleware/auth');
 const slugify = require('../helpers/slugify');
 
 router.get('/', async (req, res) => {
   // TODO: add pagination (query params)
-  // gets posts and adds static link
+  // gets posts, adds static link and ands # of upvotes
   const posts = await dbposts.getPosts();
   const formattedPosts = posts.map(post => {
-    const newPost = { ...post, localUrl: `/posts/${post.localUrl}` };
+    const newPost = {
+      ...post,
+      localUrl: `/posts/${post.localUrl}`
+    };
     return newPost;
   });
 

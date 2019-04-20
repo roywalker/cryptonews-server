@@ -18,16 +18,36 @@ module.exports = {
   },
   dbposts: {
     getPosts: () => {
-      return db('posts');
+      return db('posts')
+        .select(
+          db.raw(
+            'posts.*, users.username as author, (SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId")'
+          )
+        )
+        .join('users', { 'posts.authorId': 'users.id' });
     },
     getPostById: id => {
       return db('posts').where({ id });
     },
     getPostByUrlSlug: localUrl => {
-      return db('posts').where({ localUrl });
+      return db('posts')
+        .select(
+          db.raw(
+            'posts.*, users.username as author, (SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId")'
+          )
+        )
+        .join('users', { 'posts.authorId': 'users.id' })
+        .where({ localUrl });
     },
     getPostComments: postId => {
-      return db('comments').where({ postId });
+      return db('comments')
+        .select(
+          db.raw(
+            'comments.id, comments.comment, users.username as author, comments.date, (SELECT COUNT(*) as upvotes FROM upvotes WHERE upvotes."commentId" = comments.id)'
+          )
+        )
+        .join('users', { 'comments.authorId': 'users.id' })
+        .where({ postId });
     },
     addPost: post => {
       return db('posts')
@@ -68,6 +88,11 @@ module.exports = {
     }
   },
   dbupvotes: {
+    getUpvotesById: postId => {
+      return db('upvotes')
+        .where({ postId })
+        .count('*');
+    },
     verifyUpvote: upvote => {
       return db('upvotes').where({ ...upvote });
     },
