@@ -1,7 +1,7 @@
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeParam } = require('express-validator/filter');
-const { hashPassword, createJWT } = require('../auth');
-const { dbuser } = require('../data/helpers');
+const { hashPassword, createJWT, checkPassword } = require('../auth');
+const db = require('../data/helpers');
 
 exports.validate = () => {
   return [
@@ -10,42 +10,57 @@ exports.validate = () => {
     }),
 
     body('username')
-      .matches(/^[a-zA-Z0-9]\w*[a-zA-Z0-9]$/i)
-      .withMessage(
-        'Should be alphanumeric characters. Underscores allowed between characters.'
-      )
+      .matches(/^\w*$/i)
+      .withMessage('Must be alphanumeric characters. Underscores allowed.')
 
       .isLength({ min: 3, max: 24 })
-      .withMessage('Should contain between 3 and 20 characters.')
+      .withMessage('Must contain between 3 and 24 characters.')
 
       .custom(async username => {
-        const [userExists] = await dbuser.getUserByUsername(username);
+        const [userExists] = await db.user.getByUsername(username);
         if (userExists) return false;
       })
       .withMessage('Username taken.'),
 
     body('password')
-      .matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)/i)
+      .matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/i)
       .withMessage(
-        'Should include at least 1 lowercase letter, 1 uppercase letter, 1 digit and 1 symbol.'
+        'Must include at least 1 lowercase letter, 1 uppercase letter and 1 digit.'
       )
 
       .isLength({ min: 10, max: 32 })
-      .withMessage('Should contain between 10 and 32 characters.')
+      .withMessage('Must contain between 10 and 32 characters.')
   ];
 };
 
-exports.createUser = async (req, res, next) => {
+exports.register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty())
     return res.status(422).json({ errors: errors.array() });
 
-  const [newUserId] = await dbuser.addUser({
+  const [newUserId] = await db.user.add({
     username: req.body.username,
     password: await hashPassword(req.body.password)
   });
 
   const token = createJWT(newUserId);
-
   res.status(201).json({ token });
+};
+
+exports.login = async (req, res) => {
+  const { username, password } = req.body;
+
+  // checks for username
+  const [userExists] = await db.user.getByUsername(username);
+  if (!userExists)
+    return res.status(401).json({ message: 'Username not found.' });
+
+  // checks for password match
+  const passwordMatch = await checkPassword(password, userExists.password);
+  if (!passwordMatch)
+    return res.status(401).json({ message: 'Incorrect password.' });
+
+  const token = await createJWT(userExists.id);
+
+  res.status(200).json({ token });
 };

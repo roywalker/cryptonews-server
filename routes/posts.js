@@ -3,7 +3,7 @@ const router = express.Router();
 const { dbposts } = require('../data/helpers');
 const { param, validationResult } = require('express-validator/check');
 const posts = require('.././controllers/posts');
-const { auth } = require('../auth');
+const { tokenAuth } = require('../auth');
 const slugify = require('../helpers/slugify');
 
 router.get('/', async (req, res) => {
@@ -46,7 +46,7 @@ router.get('/:localUrl', async (req, res) => {
 });
 
 // prettier-ignore
-router.post('/', auth, posts.validate(),
+router.post('/', tokenAuth, posts.validate(),
   async (req, res) => {
     // validates format
     const errors = validationResult(req);
@@ -82,7 +82,7 @@ router.post('/', auth, posts.validate(),
 );
 
 // prettier-ignore
-router.delete('/:postId', auth, [
+router.delete('/:postId', tokenAuth, [
     param('postId').isInt().withMessage('Invalid ID.')
   ],
   async (req, res) => {

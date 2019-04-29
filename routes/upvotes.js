@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { dbposts, dbcomments, dbupvotes } = require('../data/helpers');
 const { param, validationResult } = require('express-validator/check');
-const { auth } = require('../auth');
+const { tokenAuth } = require('../auth');
 
 // prettier-ignore
-router.post('/:type/:contentId', auth, [
+router.post('/:type/:contentId', tokenAuth, [
     param('contentId')
       .isInt()
       .withMessage('Invalid ID.'),

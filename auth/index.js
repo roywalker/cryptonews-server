@@ -6,27 +6,33 @@ exports.hashPassword = password => {
   return bcrypt.hashSync(password, 10);
 };
 
+exports.checkPassword = (password, dbPassword) => {
+  return bcrypt.compareSync(password, dbPassword);
+};
+
 exports.createJWT = user => {
   return jwt.sign({ user }, config.jwt.secret, {
     expiresIn: config.jwt.expires
   });
 };
 
-exports.verifyJWT = () => {};
+exports.verifyJWT = (token, secret) => {
+  try {
+    return jwt.verify(token, secret);
+  } catch (err) {
+    return false;
+  }
+};
 
-exports.auth = async (req, res, next) => {
-  if (!req.headers.token) {
+exports.tokenAuth = (req, res, next) => {
+  if (!req.headers.token)
     return res.status(401).json({
       error: 'You must include an authorization token to access this endpoint.'
     });
-  }
 
-  try {
-    const decoded = jwt.verify(req.headers.token, process.env.JWT_SECRET);
-    req.headers.user = decoded.user;
-  } catch (err) {
-    return res.status(401).json({ error: 'Invalid token.' });
-  }
+  const decoded = this.verifyJWT(req.headers.token, process.env.JWT_SECRET);
+  if (!decoded) return res.status(401).json({ error: 'Invalid token.' });
 
+  req.headers.user = decoded.user;
   next();
 };

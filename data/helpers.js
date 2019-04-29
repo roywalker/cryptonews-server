@@ -2,21 +2,21 @@ const knex = require('knex');
 const config = require('../config');
 const db = knex(config.db);
 
-exports.dbuser = {
-  addUser: user => {
+exports.user = {
+  add: user => {
     return db('users')
       .insert(user)
       .returning('id');
   },
-  getUserById: id => {
+  getById: id => {
     return db('users').where({ id });
   },
-  getUserByUsername: username => {
+  getByUsername: username => {
     return db('users').where({ username });
   }
 };
 
-exports.dbposts = {
+exports.posts = {
   getPosts: () => {
     return db('posts')
       .select(
@@ -60,7 +60,7 @@ exports.dbposts = {
       .del();
   }
 };
-exports.dbcomments = {
+exports.comments = {
   getCommentById: id => {
     return db('comments').where({ id });
   },
@@ -88,7 +88,7 @@ exports.dbcomments = {
   }
 };
 
-exports.dbupvotes = {
+exports.upvotes = {
   getUpvotesById: postId => {
     return db('upvotes')
       .where({ postId })

@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { dbcomments, dbusers, dbposts } = require('../data/helpers');
 const { body, param, validationResult } = require('express-validator/check');
-const { auth } = require('../auth');
+const { tokenAuth } = require('../auth');
 
 // prettier-ignore
-router.post('/', auth, [
+router.post('/', tokenAuth, [
     body('postId')
       .isInt()
       .withMessage('Invalid post ID.'),
@@ -39,7 +39,7 @@ router.post('/', auth, [
 );
 
 // prettier-ignore
-router.delete('/:commentId', auth, [
+router.delete('/:commentId', tokenAuth, [
     param('commentId')
       .isInt()
       .withMessage('Invalid ID.')
