@@ -1,3 +1,5 @@
+const posts = require('./controllers/posts');
+
 const postsRouter = require('./routes/posts');
 const commentsRouter = require('./routes/comments');
 const userRouter = require('./routes/user');
@@ -6,10 +8,15 @@ const winston = require('winston');
 const { combine, timestamp, prettyPrint } = winston.format;
 
 module.exports = app => {
+  app.param(['localUrl', 'postId'], posts.check);
   app.use('/api/user', userRouter);
   app.use('/api/posts', postsRouter);
   app.use('/api/comments', commentsRouter);
   app.use('/api/upvotes', upvotesRouter);
+
+  app.get('*', (req, res) => {
+    res.status(404).json({ message: 'not found' });
+  });
 
   app.use((err, req, res, next) => {
     if (err.type === 'entity.parse.failed') {

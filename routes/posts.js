@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { dbposts } = require('../data/helpers');
-const { body, param, validationResult } = require('express-validator/check');
-const auth = require('../middleware/auth');
+const { param, validationResult } = require('express-validator/check');
+const posts = require('.././controllers/posts');
+const { auth } = require('../auth');
 const slugify = require('../helpers/slugify');
 
 router.get('/', async (req, res) => {
@@ -45,17 +46,7 @@ router.get('/:localUrl', async (req, res) => {
 });
 
 // prettier-ignore
-router.post('/', auth, [
-    body('title')
-      .isLength({ min: 5, max: 128 })
-      .trim()
-      .escape()
-      .withMessage('Should contain between 5 and 128 characters.'),
-    body('url')
-      .isURL()
-      .trim()
-      .withMessage('Should be a valid URL.')
-  ],
+router.post('/', auth, posts.validate(),
   async (req, res) => {
     // validates format
     const errors = validationResult(req);

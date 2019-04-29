@@ -1,7 +1,20 @@
-require('dotenv').config();
+const config = require('../config');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
-async function auth(req, res, next) {
+exports.hashPassword = password => {
+  return bcrypt.hashSync(password, 10);
+};
+
+exports.createJWT = user => {
+  return jwt.sign({ user }, config.jwt.secret, {
+    expiresIn: config.jwt.expires
+  });
+};
+
+exports.verifyJWT = () => {};
+
+exports.auth = async (req, res, next) => {
   if (!req.headers.token) {
     return res.status(401).json({
       error: 'You must include an authorization token to access this endpoint.'
@@ -16,5 +29,4 @@ async function auth(req, res, next) {
   }
 
   next();
-}
-module.exports = auth;
+};

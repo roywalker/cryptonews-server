@@ -14,6 +14,7 @@ module.exports = {
     useNullAsDefault: true
   },
   jwt: {
-    secret: process.env.JWT_SECRET || 'shhhhhh'
+    secret: process.env.JWT_SECRET || 'shhhhhh',
+    expires: process.env.JWT_EXPIRES || '7d'
   }
 };
