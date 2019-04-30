@@ -1,9 +1,9 @@
 const posts = require('./controllers/posts');
 const users = require('./controllers/users');
+const { tokenAuth } = require('./auth');
 const winston = require('winston');
 const { combine, timestamp, prettyPrint } = winston.format;
 
-const postsRouter = require('./routes/posts');
 const commentsRouter = require('./routes/comments');
 const upvotesRouter = require('./routes/upvotes');
 
@@ -11,8 +11,13 @@ module.exports = app => {
   app.post('/api/register', users.validate(), users.register);
   app.post('/api/login', users.login);
 
-  app.param(['localUrl', 'postId'], posts.check);
-  app.use('/api/posts', postsRouter);
+  app.param(['post'], posts.checkAndLoad);
+  app.get('/api/posts', posts.list);
+  app.get('/api/posts/:post', posts.view);
+
+  app.post('/api/posts/', tokenAuth, posts.validate(), posts.add);
+  app.delete('/api/posts/:post', tokenAuth, posts.delete);
+
   app.use('/api/comments', commentsRouter);
   app.use('/api/upvotes', upvotesRouter);
 

@@ -10,8 +10,8 @@ exports.checkPassword = (password, dbPassword) => {
   return bcrypt.compareSync(password, dbPassword);
 };
 
-exports.createJWT = user => {
-  return jwt.sign({ user }, config.jwt.secret, {
+exports.createJWT = (id, username) => {
+  return jwt.sign({ user: { id, username } }, config.jwt.secret, {
     expiresIn: config.jwt.expires
   });
 };

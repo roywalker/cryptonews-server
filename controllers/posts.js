@@ -1,4 +1,7 @@
-const { body } = require('express-validator/check');
+const { body, validationResult, param } = require('express-validator/check');
+const db = require('../data/helpers');
+const urlSlug = require('url-slug');
+const nanoid = require('nanoid/generate');
 
 exports.validate = () => {
   return [
@@ -6,13 +9,64 @@ exports.validate = () => {
       .isLength({ min: 5, max: 128 })
       .trim()
       .escape()
-      .withMessage('Should contain between 5 and 128 characters.'),
+      .withMessage('Must contain between 5 and 128 characters.'),
 
     body('url')
       .isURL()
-      .trim()
-      .withMessage('Should be a valid URL.')
+      .withMessage('Invalid URL.')
   ];
 };
 
-exports.check = async (req, res, next, id) => {};
+exports.checkAndLoad = async (req, res, next, post) => {
+  req.post = await db.posts.getById(post);
+  if (!req.post) return res.status(404).json({ message: 'Post not found.' });
+  next();
+};
+
+exports.list = async (req, res) => {
+  // TODO: add pagination (query params)
+  const posts = await db.posts.get();
+  return res.json({
+    count: posts.length,
+    next: null,
+    previous: null,
+    results: posts
+  });
+};
+
+exports.view = async (req, res) => {
+  // TODO: add pagination (query params)
+  const comments = await db.comments.getByPost(req.post.id);
+  req.post.comments = {
+    count: comments.length,
+    next: null,
+    previous: null,
+    results: comments
+  };
+
+  return res.json(req.post);
+};
+
+exports.add = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res.status(422).json({ errors: errors.array() });
+
+  const post = await db.posts.add({
+    title: req.body.title,
+    url: req.body.url,
+    authorId: req.headers.user.id,
+    localUrl: urlSlug(req.body.title) + '-' + nanoid('1234567890abcdef', 12)
+  });
+
+  return res.status(201).json(post);
+};
+
+exports.delete = async (req, res) => {
+  if (req.headers.user.username !== req.post.author)
+    return res.status(401).json({ message: `You can't delete this post.` });
+
+  await db.posts.delete(req.post.id);
+
+  return res.status(204).json();
+};

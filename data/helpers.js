@@ -17,29 +17,62 @@ exports.user = {
 };
 
 exports.posts = {
-  getPosts: () => {
+  get: () => {
     return db('posts')
       .select(
-        db.raw(
-          'posts.*, users.username as author, (SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId")'
-        )
+        'posts.id',
+        'posts.title',
+        'posts.url',
+        'posts.date',
+        'users.username as author',
+        'posts.localUrl',
+        db.raw(`
+          (SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId"),
+          (SELECT COUNT(*) as comments FROM comments WHERE posts.id = comments."postId")`)
       )
       .join('users', { 'posts.authorId': 'users.id' });
   },
-  getPostById: id => {
-    return db('posts').where({ id });
-  },
-  getPostByUrlSlug: localUrl => {
+  getById: id => {
     return db('posts')
       .select(
+        'posts.id',
+        'posts.title',
+        'posts.url',
+        'posts.date',
+        'users.username as author',
+        'posts.localUrl',
         db.raw(
-          'posts.*, users.username as author, (SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId")'
+          '(SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId")'
         )
       )
       .join('users', { 'posts.authorId': 'users.id' })
-      .where({ localUrl });
+      .where({ 'posts.id': id })
+      .first();
   },
-  getPostComments: postId => {
+  add: async post => {
+    const [id] = await db('posts')
+      .insert(post)
+      .returning('id');
+    return db('posts').where({ id });
+  },
+  delete: id => {
+    return db('posts')
+      .where({ id })
+      .del();
+  }
+  // getByUrlSlug: localUrl => {
+  //   return db('posts')
+  //     .select(
+  //       db.raw(
+  //         'posts.*, users.username as author, (SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId")'
+  //       )
+  //     )
+  //     .join('users', { 'posts.authorId': 'users.id' })
+  //     .where({ localUrl });
+  // },
+};
+exports.comments = {
+  getByPost: postId => {
     return db('comments')
       .select(
         db.raw(
@@ -49,18 +82,6 @@ exports.posts = {
       .join('users', { 'comments.authorId': 'users.id' })
       .where({ postId });
   },
-  addPost: post => {
-    return db('posts')
-      .insert(post)
-      .returning('id');
-  },
-  deletePost: id => {
-    return db('posts')
-      .where({ id })
-      .del();
-  }
-};
-exports.comments = {
   getCommentById: id => {
     return db('comments').where({ id });
   },

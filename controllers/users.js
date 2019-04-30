@@ -43,7 +43,7 @@ exports.register = async (req, res) => {
     password: await hashPassword(req.body.password)
   });
 
-  const token = createJWT(newUserId);
+  const token = createJWT(newUserId, req.body.username);
   res.status(201).json({ token });
 };
 
@@ -60,7 +60,7 @@ exports.login = async (req, res) => {
   if (!passwordMatch)
     return res.status(401).json({ message: 'Incorrect password.' });
 
-  const token = await createJWT(userExists.id);
+  const token = await createJWT(userExists.id, userExists.username);
 
   res.status(200).json({ token });
 };

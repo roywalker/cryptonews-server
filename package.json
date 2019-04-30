@@ -19,7 +19,9 @@
     "helmet": "^3.16.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.16.5",
+    "nanoid": "^2.0.1",
     "pg": "^7.9.0",
+    "url-slug": "^2.1.0",
     "winston": "^3.2.1"
   },
   "scripts": {
