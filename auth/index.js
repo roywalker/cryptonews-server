@@ -1,7 +1,6 @@
 const config = require('../config');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const passport = require('passport');
 
 exports.hashPassword = password => {
   return bcrypt.hashSync(password, 10);
