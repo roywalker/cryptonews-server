@@ -36,3 +36,15 @@ exports.tokenAuth = (req, res, next) => {
   req.user = decoded.user;
   next();
 };
+
+exports.postAuth = (req, res, next) => {
+  if (req.user.username !== req.post.author)
+    return res.status(401).json({ message: `You can't delete this post.` });
+  next();
+};
+
+exports.commentAuth = (req, res, next) => {
+  if (req.user.id !== req.comment.authorId)
+    return res.status(401).json({ error: `You can't delete this comment.` });
+  next();
+};

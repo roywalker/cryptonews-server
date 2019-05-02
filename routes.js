@@ -2,7 +2,7 @@ const router = require('express').Router();
 const posts = require('./controllers/posts');
 const users = require('./controllers/users');
 const comments = require('./controllers/comments');
-const { tokenAuth } = require('./auth');
+const { tokenAuth, postAuth, commentAuth } = require('./auth');
 const { logger } = require('./config');
 
 router.post('/register', users.validate(), users.register);
@@ -10,15 +10,15 @@ router.post('/login', users.login);
 
 router.param(['post'], posts.load);
 router.get('/posts', posts.list);
-router.get('/posts/:post', posts.view);
-router.post('/posts/', tokenAuth, posts.validate(), posts.add);
-router.post('/posts/:post/vote', tokenAuth, posts.vote);
-router.delete('/posts/:post', tokenAuth, posts.delete);
+router.get('/post/:post', posts.view);
+router.post('/post/', tokenAuth, posts.validate(), posts.add);
+router.post('/post/:post/vote', tokenAuth, posts.vote);
+router.delete('/post/:post', tokenAuth, postAuth, posts.delete);
 
 router.param(['comment'], comments.load);
-router.post('/posts/:post/comments', tokenAuth, comments.valid(), comments.add);
-router.post('/posts/:post/comments/:comment/vote', tokenAuth, comments.vote);
-router.delete('/posts/:post/comments/:comment', tokenAuth, comments.delete);
+router.post('/post/:post/comments', tokenAuth, comments.validate(), comments.add); // prettier-ignore
+router.post('/post/:post/comments/:comment/vote', tokenAuth, comments.vote);
+router.delete('/post/:post/comments/:comment', tokenAuth, commentAuth, comments.delete); // prettier-ignore
 
 module.exports = app => {
   app.use('/api', router);

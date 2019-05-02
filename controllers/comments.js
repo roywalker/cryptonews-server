@@ -1,7 +1,7 @@
 const { body, validationResult } = require('express-validator/check');
 const db = require('../data/helpers');
 
-exports.valid = () => {
+exports.validate = () => {
   return [
     body('comment')
       .trim()
@@ -26,10 +26,6 @@ exports.add = async (req, res) => {
 };
 
 exports.delete = async (req, res) => {
-  if (req.user.id !== req.comment.authorId) {
-    return res.status(401).json({ error: `You can't delete this comment.` });
-  }
-
   await db.comments.deleteComment(req.comment.id);
   return res.status(204).end();
 };

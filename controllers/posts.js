@@ -63,9 +63,6 @@ exports.add = async (req, res) => {
 };
 
 exports.delete = async (req, res) => {
-  if (req.user.username !== req.post.author)
-    return res.status(401).json({ message: `You can't delete this post.` });
-
   await db.posts.delete(req.post.id);
   return res.status(204).end();
 };
