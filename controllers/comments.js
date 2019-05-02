@@ -34,7 +34,7 @@ exports.delete = async (req, res) => {
   return res.status(204).json();
 };
 
-exports.checkAndLoad = async (req, res, next, comment) => {
+exports.load = async (req, res, next, comment) => {
   req.comment = await db.comments.getCommentById(comment);
   if (!req.comment)
     return res.status(404).json({ message: 'Comment not found.' });

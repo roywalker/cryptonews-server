@@ -17,7 +17,7 @@ exports.validate = () => {
   ];
 };
 
-exports.checkAndLoad = async (req, res, next, post) => {
+exports.load = async (req, res, next, post) => {
   req.post = await db.posts.getById(post);
   if (!req.post) return res.status(404).json({ message: 'Post not found.' });
   next();
