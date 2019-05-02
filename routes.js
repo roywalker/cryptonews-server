@@ -1,25 +1,27 @@
+const router = require('express').Router();
 const posts = require('./controllers/posts');
 const users = require('./controllers/users');
+const comments = require('./controllers/comments');
 const { tokenAuth } = require('./auth');
 const winston = require('winston');
 const { combine, timestamp, prettyPrint } = winston.format;
 
-const commentsRouter = require('./routes/comments');
-const upvotesRouter = require('./routes/upvotes');
+router.post('/register', users.validate(), users.register);
+router.post('/login', users.login);
+
+router.param(['post'], posts.checkAndLoad);
+router.get('/posts', posts.list);
+router.get('/posts/:post', posts.view);
+router.post('/posts/', tokenAuth, posts.validate(), posts.add);
+router.delete('/posts/:post', tokenAuth, posts.delete);
+router.post('/posts/:post/vote', tokenAuth, posts.checkAndLoad, posts.vote);
+
+router.param(['comment'], comments.checkAndLoad);
+router.post('/posts/:post/comments', tokenAuth, comments.valid(), comments.add);
+router.delete('/posts/:post/comments/:comment', tokenAuth, comments.delete);
 
 module.exports = app => {
-  app.post('/api/register', users.validate(), users.register);
-  app.post('/api/login', users.login);
-
-  app.param(['post'], posts.checkAndLoad);
-  app.get('/api/posts', posts.list);
-  app.get('/api/posts/:post', posts.view);
-
-  app.post('/api/posts/', tokenAuth, posts.validate(), posts.add);
-  app.delete('/api/posts/:post', tokenAuth, posts.delete);
-
-  app.use('/api/comments', commentsRouter);
-  app.use('/api/upvotes', upvotesRouter);
+  app.use('/api', router);
 
   app.get('*', (req, res) => {
     res.status(404).json({ message: 'Not found.' });

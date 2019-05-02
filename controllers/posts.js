@@ -1,4 +1,4 @@
-const { body, validationResult, param } = require('express-validator/check');
+const { body, validationResult } = require('express-validator/check');
 const db = require('../data/helpers');
 const urlSlug = require('url-slug');
 const nanoid = require('nanoid/generate');
@@ -55,7 +55,7 @@ exports.add = async (req, res) => {
   const post = await db.posts.add({
     title: req.body.title,
     url: req.body.url,
-    authorId: req.headers.user.id,
+    authorId: req.user.id,
     localUrl: urlSlug(req.body.title) + '-' + nanoid('1234567890abcdef', 12)
   });
 
@@ -63,10 +63,17 @@ exports.add = async (req, res) => {
 };
 
 exports.delete = async (req, res) => {
-  if (req.headers.user.username !== req.post.author)
+  if (req.user.username !== req.post.author)
     return res.status(401).json({ message: `You can't delete this post.` });
 
   await db.posts.delete(req.post.id);
-
   return res.status(204).json();
+};
+
+exports.vote = async (req, res) => {
+  const updatedVotes = await db.votes.vote(req.user.id, req.post.id);
+  res.json({
+    message: 'Vote recorded.',
+    upvotes: updatedVotes.count
+  });
 };

@@ -33,6 +33,6 @@ exports.tokenAuth = (req, res, next) => {
   const decoded = this.verifyJWT(req.headers.token, process.env.JWT_SECRET);
   if (!decoded) return res.status(401).json({ error: 'Invalid token.' });
 
-  req.headers.user = decoded.user;
+  req.user = decoded.user;
   next();
 };

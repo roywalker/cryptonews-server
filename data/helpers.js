@@ -9,14 +9,24 @@ exports.user = {
       .returning('id');
   },
   getById: id => {
-    return db('users').where({ id });
+    return db('users')
+      .where({ id })
+      .first();
   },
   getByUsername: username => {
-    return db('users').where({ username });
+    return db('users')
+      .where({ username })
+      .first();
   }
 };
 
 exports.posts = {
+  add: async post => {
+    const [id] = await db('posts')
+      .insert(post)
+      .returning('id');
+    return db('posts').where({ id });
+  },
   get: () => {
     return db('posts')
       .select(
@@ -49,29 +59,21 @@ exports.posts = {
       .where({ 'posts.id': id })
       .first();
   },
-  add: async post => {
-    const [id] = await db('posts')
-      .insert(post)
-      .returning('id');
-    return db('posts').where({ id });
-  },
   delete: id => {
     return db('posts')
       .where({ id })
       .del();
   }
-  // getByUrlSlug: localUrl => {
-  //   return db('posts')
-  //     .select(
-  //       db.raw(
-  //         'posts.*, users.username as author, (SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId")'
-  //       )
-  //     )
-  //     .join('users', { 'posts.authorId': 'users.id' })
-  //     .where({ localUrl });
-  // },
 };
 exports.comments = {
+  add: async comment => {
+    const [id] = await db('comments')
+      .insert(comment)
+      .returning('id');
+    return db('comments')
+      .where({ id })
+      .first();
+  },
   getByPost: postId => {
     return db('comments')
       .select(
@@ -83,12 +85,9 @@ exports.comments = {
       .where({ postId });
   },
   getCommentById: id => {
-    return db('comments').where({ id });
-  },
-  addComment: comment => {
     return db('comments')
-      .insert(comment)
-      .returning('id');
+      .where({ id })
+      .first();
   },
   deleteComment: id => {
     return db('comments')
@@ -109,21 +108,30 @@ exports.comments = {
   }
 };
 
-exports.upvotes = {
-  getUpvotesById: postId => {
+exports.votes = {
+  vote: async (authorId, postId) => {
+    const exists = await exports.votes.verify({ authorId, postId });
+    if (!exists) await exports.votes.add({ authorId, postId });
+    else await exports.votes.remove({ authorId, postId });
+    return await exports.votes.getByPostId(postId);
+  },
+  verify: vote => {
+    return db('upvotes')
+      .where({ ...vote })
+      .first();
+  },
+  add: vote => {
+    return db('upvotes').insert(vote);
+  },
+  remove: vote => {
+    return db('upvotes')
+      .where({ ...vote })
+      .del();
+  },
+  getByPostId: postId => {
     return db('upvotes')
       .where({ postId })
-      .count('*');
-  },
-  verifyUpvote: upvote => {
-    return db('upvotes').where({ ...upvote });
-  },
-  addUpvote: upvote => {
-    return db('upvotes').insert(upvote);
-  },
-  removeUpvote: upvote => {
-    return db('upvotes')
-      .where({ ...upvote })
-      .del();
+      .count('*')
+      .first();
   }
 };
