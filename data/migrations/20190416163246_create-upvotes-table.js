@@ -1,5 +1,5 @@
 exports.up = function(knex, Promise) {
-  return knex.schema.createTable('upvotes', table => {
+  return knex.schema.createTable('votes', table => {
     table
       .integer('authorId')
       .notNullable()
@@ -21,5 +21,5 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-  return knex.schema.dropTableIfExists('upvotes');
+  return knex.schema.dropTableIfExists('votes');
 };

@@ -2,18 +2,18 @@ require('dotenv').config();
 const winston = require('winston');
 
 module.exports = {
-  port: process.env.PORT || 3001,
   db: {
     client: 'pg',
     connection: process.env.DATABASE_URL || 'postgres://localhost/cryptonews',
     migrations: {
-      directory: './data/migrations'
+      directory: './migrations'
     },
     seeds: {
-      directory: './data/seeds'
+      directory: './seeds'
     },
     useNullAsDefault: true
   },
+  port: process.env.PORT || 3001,
   jwt: {
     secret: process.env.JWT_SECRET || 'shhhhhh',
     expires: process.env.JWT_EXPIRES || '7d'
