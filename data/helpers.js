@@ -37,7 +37,7 @@ exports.posts = {
         'users.username as author',
         'posts.localUrl',
         db.raw(`
-          (SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId"),
+          (SELECT COUNT(*) as votes FROM votes WHERE posts.id = votes."postId"),
           (SELECT COUNT(*) as comments FROM comments WHERE posts.id = comments."postId")`)
       )
       .join('users', { 'posts.authorId': 'users.id' });
@@ -52,7 +52,7 @@ exports.posts = {
         'users.username as author',
         'posts.localUrl',
         db.raw(
-          '(SELECT COUNT(*) as upvotes FROM upvotes WHERE posts.id = upvotes."postId")'
+          '(SELECT COUNT(*) as votes FROM votes WHERE posts.id = votes."postId")'
         )
       )
       .join('users', { 'posts.authorId': 'users.id' })
@@ -83,7 +83,7 @@ exports.comments = {
     return db('comments')
       .select(
         db.raw(
-          'comments.id, comments.comment, users.username as author, comments.date, (SELECT COUNT(*) as upvotes FROM upvotes WHERE upvotes."commentId" = comments.id)'
+          'comments.id, comments.comment, users.username as author, comments.date, (SELECT COUNT(*) as votes FROM votes WHERE votes."commentId" = comments.id)'
         )
       )
       .join('users', { 'comments.authorId': 'users.id' })
@@ -105,20 +105,20 @@ exports.votes = {
     return await exports.votes.getByContent(postId, commentId);
   },
   verify: vote => {
-    return db('upvotes')
+    return db('votes')
       .where({ ...vote })
       .first();
   },
   add: vote => {
-    return db('upvotes').insert(vote);
+    return db('votes').insert(vote);
   },
   remove: vote => {
-    return db('upvotes')
+    return db('votes')
       .where({ ...vote })
       .del();
   },
   getByContent: (postId, commentId) => {
-    return db('upvotes')
+    return db('votes')
       .where({ postId, commentId })
       .count('*')
       .first();
