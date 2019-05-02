@@ -74,6 +74,11 @@ exports.comments = {
       .where({ id })
       .first();
   },
+  getById: id => {
+    return db('comments')
+      .where({ id })
+      .first();
+  },
   getByPost: postId => {
     return db('comments')
       .select(
@@ -83,11 +88,6 @@ exports.comments = {
       )
       .join('users', { 'comments.authorId': 'users.id' })
       .where({ postId });
-  },
-  getCommentById: id => {
-    return db('comments')
-      .where({ id })
-      .first();
   },
   deleteComment: id => {
     return db('comments')
