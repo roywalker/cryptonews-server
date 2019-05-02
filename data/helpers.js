@@ -97,11 +97,12 @@ exports.comments = {
 };
 
 exports.votes = {
-  vote: async (authorId, postId) => {
-    const exists = await exports.votes.verify({ authorId, postId });
-    if (!exists) await exports.votes.add({ authorId, postId });
-    else await exports.votes.remove({ authorId, postId });
-    return await exports.votes.getByPost(postId);
+  vote: async (authorId, postId = null, commentId = null) => {
+    const vote = { authorId, postId, commentId };
+    const exists = await exports.votes.verify(vote);
+    if (!exists) await exports.votes.add(vote);
+    else await exports.votes.remove(vote);
+    return await exports.votes.getByContent(postId, commentId);
   },
   verify: vote => {
     return db('upvotes')
@@ -116,9 +117,9 @@ exports.votes = {
       .where({ ...vote })
       .del();
   },
-  getByPost: postId => {
+  getByContent: (postId, commentId) => {
     return db('upvotes')
-      .where({ postId })
+      .where({ postId, commentId })
       .count('*')
       .first();
   }

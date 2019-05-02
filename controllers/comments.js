@@ -41,4 +41,7 @@ exports.load = async (req, res, next, comment) => {
   next();
 };
 
-exports.vote = async (req, res) => {};
+exports.vote = async (req, res) => {
+  const votes = await db.votes.vote(req.user.id, null, req.comment.id);
+  res.json({ upvotes: votes.count });
+};

@@ -17,6 +17,7 @@ router.delete('/posts/:post', tokenAuth, posts.delete);
 
 router.param(['comment'], comments.load);
 router.post('/posts/:post/comments', tokenAuth, comments.valid(), comments.add);
+router.post('/posts/:post/comments/:comment/vote', tokenAuth, comments.vote);
 router.delete('/posts/:post/comments/:comment', tokenAuth, comments.delete);
 
 module.exports = app => {

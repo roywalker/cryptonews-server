@@ -61,6 +61,5 @@ exports.login = async (req, res) => {
     return res.status(401).json({ message: 'Incorrect password.' });
 
   const token = await createJWT(userExists.id, userExists.username);
-
   res.status(200).json({ token });
 };
