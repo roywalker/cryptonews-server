@@ -1,6 +1,7 @@
 const config = require('../config');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const passport = require('passport');
 
 exports.hashPassword = password => {
   return bcrypt.hashSync(password, 10);
@@ -26,12 +27,11 @@ exports.verifyJWT = (token, secret) => {
 
 exports.tokenAuth = (req, res, next) => {
   if (!req.headers.token)
-    return res.status(401).json({
-      error: 'You must include an authorization token to access this endpoint.'
-    });
+    return res.status(401).json({ error: 'Access denied (no token found).' });
 
   const decoded = this.verifyJWT(req.headers.token, process.env.JWT_SECRET);
-  if (!decoded) return res.status(401).json({ error: 'Invalid token.' });
+  if (!decoded)
+    return res.status(401).json({ error: 'Access denied (invalid token).' });
 
   req.user = decoded.user;
   next();

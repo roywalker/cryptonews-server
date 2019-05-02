@@ -52,16 +52,13 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { username, password } = req.body;
 
-  // checks for username
-  const userExists = await db.user.getByUsername(username);
-  if (!userExists)
-    return res.status(401).json({ message: 'Username not found.' });
+  const user = await db.user.getByUsername(username);
+  if (!user) return res.status(401).json({ message: 'User not found.' });
 
-  // checks for password match
-  const passwordMatch = await checkPassword(password, userExists.password);
+  const passwordMatch = await checkPassword(password, user.password);
   if (!passwordMatch)
-    return res.status(401).json({ message: 'Incorrect password.' });
+    return res.status(401).json({ message: 'Invalid password.' });
 
-  const token = await createJWT(userExists.id, userExists.username);
+  const token = await createJWT(user.id, user.username);
   res.status(200).json({ token });
 };
