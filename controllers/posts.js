@@ -71,6 +71,6 @@ exports.delete = async (req, res) => {
 };
 
 exports.vote = async (req, res) => {
-  const votes = await db.votes.vote(req.user.id, req.post.id);
+  const votes = await db.votes.vote(req.user.id, req.post.id, null);
   res.json({ upvotes: votes.count });
 };
