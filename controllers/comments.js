@@ -31,7 +31,7 @@ exports.delete = async (req, res) => {
   }
 
   await db.comments.deleteComment(req.comment.id);
-  return res.status(204).json();
+  return res.status(204).end();
 };
 
 exports.load = async (req, res, next, comment) => {
@@ -40,3 +40,5 @@ exports.load = async (req, res, next, comment) => {
     return res.status(404).json({ message: 'Comment not found.' });
   next();
 };
+
+exports.vote = async (req, res) => {};

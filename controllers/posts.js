@@ -67,7 +67,7 @@ exports.delete = async (req, res) => {
     return res.status(401).json({ message: `You can't delete this post.` });
 
   await db.posts.delete(req.post.id);
-  return res.status(204).json();
+  return res.status(204).end();
 };
 
 exports.vote = async (req, res) => {
