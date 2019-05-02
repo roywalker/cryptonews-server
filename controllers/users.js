@@ -36,7 +36,9 @@ exports.validate = () => {
 exports.register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty())
-    return res.status(422).json({ errors: errors.array() });
+    return res
+      .status(422)
+      .json({ errors: errors.array({ onlyFirstError: true }) });
 
   const [newUserId] = await db.user.add({
     username: req.body.username,
