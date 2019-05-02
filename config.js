@@ -1,4 +1,5 @@
 require('dotenv').config();
+const winston = require('winston');
 
 module.exports = {
   port: process.env.PORT || 3001,
@@ -16,5 +17,16 @@ module.exports = {
   jwt: {
     secret: process.env.JWT_SECRET || 'shhhhhh',
     expires: process.env.JWT_EXPIRES || '7d'
-  }
+  },
+  logger: winston
 };
+
+winston.add(
+  new winston.transports.Console({
+    handleExceptions: true,
+    format: winston.format.combine(
+      winston.format.simple(),
+      winston.format.timestamp()
+    )
+  })
+);

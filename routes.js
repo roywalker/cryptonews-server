@@ -3,20 +3,19 @@ const posts = require('./controllers/posts');
 const users = require('./controllers/users');
 const comments = require('./controllers/comments');
 const { tokenAuth } = require('./auth');
-const winston = require('winston');
-const { combine, timestamp, prettyPrint } = winston.format;
+const { logger } = require('./config');
 
 router.post('/register', users.validate(), users.register);
 router.post('/login', users.login);
 
-router.param(['post'], posts.checkAndLoad);
+router.param(['post'], posts.load);
 router.get('/posts', posts.list);
 router.get('/posts/:post', posts.view);
 router.post('/posts/', tokenAuth, posts.validate(), posts.add);
+router.post('/posts/:post/vote', tokenAuth, posts.vote);
 router.delete('/posts/:post', tokenAuth, posts.delete);
-router.post('/posts/:post/vote', tokenAuth, posts.checkAndLoad, posts.vote);
 
-router.param(['comment'], comments.checkAndLoad);
+router.param(['comment'], comments.load);
 router.post('/posts/:post/comments', tokenAuth, comments.valid(), comments.add);
 router.delete('/posts/:post/comments/:comment', tokenAuth, comments.delete);
 
@@ -31,14 +30,7 @@ module.exports = app => {
     if (err.type === 'entity.parse.failed') {
       return res.status(400).json({ message: 'Bad request.' });
     }
-    winston.error(err.message, err);
+    logger.error(err.message, err);
     return res.status(500).json({ message: 'Internal error.' });
   });
 };
-
-winston.add(
-  new winston.transports.Console({
-    handleExceptions: true,
-    format: combine(timestamp(), prettyPrint())
-  })
-);
