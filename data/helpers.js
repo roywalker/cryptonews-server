@@ -93,18 +93,6 @@ exports.comments = {
     return db('comments')
       .where({ id })
       .del();
-  },
-  getCommentsByAuthor: username => {
-    return db('users')
-      .join('comments', 'users.id', 'comments.authorId')
-      .join('posts', 'comments.postId', 'posts.id')
-      .select(
-        'comments.id',
-        'posts.localUrl as postUrl',
-        'comments.comment',
-        'comments.date'
-      )
-      .where({ username });
   }
 };
 
@@ -113,7 +101,7 @@ exports.votes = {
     const exists = await exports.votes.verify({ authorId, postId });
     if (!exists) await exports.votes.add({ authorId, postId });
     else await exports.votes.remove({ authorId, postId });
-    return await exports.votes.getByPostId(postId);
+    return await exports.votes.getByPost(postId);
   },
   verify: vote => {
     return db('upvotes')
@@ -128,7 +116,7 @@ exports.votes = {
       .where({ ...vote })
       .del();
   },
-  getByPostId: postId => {
+  getByPost: postId => {
     return db('upvotes')
       .where({ postId })
       .count('*')
