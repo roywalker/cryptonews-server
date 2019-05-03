@@ -22,12 +22,12 @@ exports.add = async (req, res) => {
     comment: req.body.comment
   });
 
-  return res.status(201).json(comment);
+  res.status(201).json(comment);
 };
 
 exports.delete = async (req, res) => {
   await db.comments.deleteComment(req.comment.id);
-  return res.status(204).end();
+  res.status(204).end();
 };
 
 exports.load = async (req, res, next, comment) => {

@@ -44,7 +44,7 @@ exports.view = async (req, res) => {
     results: comments
   };
 
-  return res.json(req.post);
+  res.json(req.post);
 };
 
 exports.add = async (req, res) => {
@@ -59,12 +59,12 @@ exports.add = async (req, res) => {
     localUrl: urlSlug(req.body.title) + '-' + nanoid('1234567890abcdef', 12)
   });
 
-  return res.status(201).json(post);
+  res.status(201).json(post);
 };
 
 exports.delete = async (req, res) => {
   await db.posts.delete(req.post.id);
-  return res.status(204).end();
+  res.status(204).end();
 };
 
 exports.vote = async (req, res) => {
