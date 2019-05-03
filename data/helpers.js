@@ -65,6 +65,7 @@ exports.posts = {
       .del();
   }
 };
+
 exports.comments = {
   add: async comment => {
     const [id] = await db('comments')
