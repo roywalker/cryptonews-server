@@ -2,7 +2,7 @@ const router = require('express').Router();
 const posts = require('./controllers/posts');
 const users = require('./controllers/users');
 const comments = require('./controllers/comments');
-const { tokenAuth, postAuth, commentAuth } = require('./auth');
+const { tokenAuth, postAuth, commentAuth } = require('./controllers/auth');
 const { logger } = require('./config');
 
 router.post('/register', users.validate(), users.register);
