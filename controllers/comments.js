@@ -31,7 +31,7 @@ exports.delete = async (req, res) => {
 };
 
 exports.load = async (req, res, next, comment) => {
-  req.comment = await db.comments.getById(comment);
+  req.comment = await db.comments.findById(comment);
   if (!req.comment)
     return res.status(404).json({ message: 'Comment not found.' });
   next();

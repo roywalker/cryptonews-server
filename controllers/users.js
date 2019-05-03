@@ -17,7 +17,7 @@ exports.validate = () => {
       .withMessage('Must contain between 3 and 24 characters.')
 
       .custom(async username => {
-        const userExists = await db.user.getByUsername(username);
+        const userExists = await db.user.findByUsername(username);
         if (userExists) return false;
       })
       .withMessage('Username taken.'),
@@ -52,7 +52,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { username, password } = req.body;
 
-  const user = await db.user.getByUsername(username);
+  const user = await db.user.findByUsername(username);
   if (!user) return res.status(401).json({ message: 'User not found.' });
 
   const passwordMatch = await checkPassword(password, user.password);

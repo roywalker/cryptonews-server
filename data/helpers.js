@@ -8,12 +8,12 @@ exports.user = {
       .insert(user)
       .returning('id');
   },
-  getById: id => {
+  findById: id => {
     return db('users')
       .where({ id })
       .first();
   },
-  getByUsername: username => {
+  findByUsername: username => {
     return db('users')
       .where({ username })
       .first();
@@ -27,7 +27,7 @@ exports.posts = {
       .returning('id');
     return db('posts').where({ id });
   },
-  get: () => {
+  list: () => {
     return db('posts')
       .select(
         'posts.id',
@@ -42,7 +42,7 @@ exports.posts = {
       )
       .join('users', { 'posts.authorId': 'users.id' });
   },
-  getById: id => {
+  findById: id => {
     return db('posts')
       .select(
         'posts.id',
@@ -74,12 +74,12 @@ exports.comments = {
       .where({ id })
       .first();
   },
-  getById: id => {
+  findById: id => {
     return db('comments')
       .where({ id })
       .first();
   },
-  getByPost: postId => {
+  findByPost: postId => {
     return db('comments')
       .select(
         db.raw(
@@ -102,7 +102,7 @@ exports.votes = {
     const exists = await exports.votes.verify(vote);
     if (!exists) await exports.votes.add(vote);
     else await exports.votes.remove(vote);
-    return await exports.votes.getByContent(postId, commentId);
+    return await exports.votes.findByContent(postId, commentId);
   },
   verify: vote => {
     return db('votes')
@@ -117,7 +117,7 @@ exports.votes = {
       .where({ ...vote })
       .del();
   },
-  getByContent: (postId, commentId) => {
+  findByContent: (postId, commentId) => {
     return db('votes')
       .where({ postId, commentId })
       .count('*')

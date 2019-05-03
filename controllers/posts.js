@@ -18,14 +18,14 @@ exports.validate = () => {
 };
 
 exports.load = async (req, res, next, post) => {
-  req.post = await db.posts.getById(post);
+  req.post = await db.posts.findById(post);
   if (!req.post) return res.status(404).json({ message: 'Post not found.' });
   next();
 };
 
 exports.list = async (req, res) => {
   // TODO: add pagination (query params)
-  const posts = await db.posts.get();
+  const posts = await db.posts.list();
   return res.json({
     count: posts.length,
     next: null,
@@ -36,7 +36,7 @@ exports.list = async (req, res) => {
 
 exports.view = async (req, res) => {
   // TODO: add pagination (query params)
-  const comments = await db.comments.getByPost(req.post.id);
+  const comments = await db.comments.findByPost(req.post.id);
   req.post.comments = {
     count: comments.length,
     next: null,
