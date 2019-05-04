@@ -36,11 +36,11 @@ exports.validate = () => {
 exports.validateLogin = () => {
   return [
     body('username')
-      .exists()
+      .isLength({ min: 1 })
       .withMessage('Must include credentials.'),
 
     body('password')
-      .exists()
+      .isLength({ min: 1 })
       .withMessage('Must include credentials.')
   ];
 };

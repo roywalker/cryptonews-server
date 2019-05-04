@@ -4,7 +4,6 @@ const helpers = require('./helpers');
 
 describe('Auth endpoints', () => {
   const username = {
-    valid: '',
     short: 'a',
     long: 'a'.repeat(50),
     invalid: 'a@!#$'
