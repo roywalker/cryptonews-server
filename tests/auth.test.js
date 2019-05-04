@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../app');
-const factory = require('./factory');
+const helpers = require('./helpers');
 
 describe('Auth endpoints', () => {
   const username = {
@@ -18,9 +18,9 @@ describe('Auth endpoints', () => {
   };
 
   beforeEach(async () => {
-    username.valid = factory.generateUsername();
-    username.existing = factory.generateUsername();
-    await factory.addUser(username.existing, password.valid);
+    username.valid = helpers.generateUsername();
+    username.existing = helpers.generateUsername();
+    await helpers.addUser(username.existing, password.valid);
   });
 
   describe('/api/login', () => {
