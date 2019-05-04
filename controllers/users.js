@@ -5,11 +5,11 @@ const db = require('../data/helpers');
 
 exports.validateRegister = () => {
   return [
-    sanitizeParam('username').customSanitizer(username => {
-      return username.toLowerCase();
-    }),
-
     body('username')
+      .customSanitizer(username => {
+        return username.toLowerCase();
+      })
+
       .matches(/^\w*$/i)
       .withMessage('Must be alphanumeric characters. Underscores allowed.')
 
@@ -36,6 +36,10 @@ exports.validateRegister = () => {
 exports.validateLogin = () => {
   return [
     body('username')
+      .customSanitizer(username => {
+        return username.toLowerCase();
+      })
+
       .isLength({ min: 1 })
       .withMessage('Must include credentials.'),
 
