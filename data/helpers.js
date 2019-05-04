@@ -1,6 +1,6 @@
 const knex = require('knex');
 const config = require('../config');
-const db = knex(config.db);
+const db = knex(config.db.env);
 
 exports.user = {
   add: user => {

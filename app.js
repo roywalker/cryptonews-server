@@ -12,4 +12,7 @@ app.use(helmet());
 
 require('./routes')(app);
 
-app.listen(config.port, () => console.log(`Listening in port ${config.port}`));
+if (require.main === module)
+  app.listen(config.port, () => console.log(`Listening...`));
+
+module.exports = app;

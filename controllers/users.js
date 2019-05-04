@@ -23,13 +23,25 @@ exports.validate = () => {
       .withMessage('Username taken.'),
 
     body('password')
-      .matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/i)
+      .isLength({ min: 10, max: 32 })
+      .withMessage('Must contain between 10 and 32 characters.')
+
+      .matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/)
       .withMessage(
         'Must include at least 1 lowercase letter, 1 uppercase letter and 1 digit.'
       )
+  ];
+};
 
-      .isLength({ min: 10, max: 32 })
-      .withMessage('Must contain between 10 and 32 characters.')
+exports.validateLogin = () => {
+  return [
+    body('username')
+      .exists()
+      .withMessage('Must include credentials.'),
+
+    body('password')
+      .exists()
+      .withMessage('Must include credentials.')
   ];
 };
 
@@ -50,6 +62,12 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res
+      .status(422)
+      .json({ errors: errors.array({ onlyFirstError: true }) });
+
   const { username, password } = req.body;
 
   const user = await db.user.findByUsername(username);

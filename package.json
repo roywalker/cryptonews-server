@@ -5,9 +5,13 @@
   "repository": "https://github.com/roywalker/cryptonews-server.git",
   "author": "Roy Walker",
   "license": "MIT",
-  "devDependencies": {
-    "nodemon": "^1.18.11",
-    "prettier": "^1.17.0"
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "db:migrate": "knex migrate:latest --knexfile=./data/knex/knexfile.js",
+    "db:seed": "knex seed:run --knexfile=./data/knex/knexfile.js",
+    "db_test:migrate": "knex migrate:latest --knexfile=./data/knex/knexfile_test.js",
+    "test": "NODE_ENV=test jest --watchAll"
   },
   "dependencies": {
     "bcrypt": "^3.0.6",
@@ -24,11 +28,11 @@
     "url-slug": "^2.1.0",
     "winston": "^3.2.1"
   },
-  "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "db:migrate": "knex migrate:latest --knexfile=./data/knexfile.js",
-    "db:seed": "knex seed:run --knexfile=./data/knexfile.js"
+  "devDependencies": {
+    "jest": "^24.7.1",
+    "nodemon": "^1.18.11",
+    "prettier": "^1.17.0",
+    "supertest": "^4.0.2"
   },
   "prettier": {
     "singleQuote": true

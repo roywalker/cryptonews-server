@@ -3,15 +3,23 @@ const winston = require('winston');
 
 module.exports = {
   db: {
-    client: 'pg',
-    connection: process.env.DATABASE_URL || 'postgres://localhost/cryptonews',
-    migrations: {
-      directory: './migrations'
+    env: {
+      client: 'pg',
+      connection: process.env.DATABASE_URL || 'postgres://localhost/cryptonews',
+      migrations: {
+        directory: './migrations'
+      },
+      seeds: {
+        directory: './seeds'
+      },
+      useNullAsDefault: true
     },
-    seeds: {
-      directory: './seeds'
-    },
-    useNullAsDefault: true
+    test: {
+      client: 'pg',
+      connection:
+        process.env.DATABASE_TEST_URL || 'postgres://localhost/cryptonews_test',
+      useNullAsDefault: true
+    }
   },
   port: process.env.PORT || 3001,
   jwt: {
