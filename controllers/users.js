@@ -3,7 +3,7 @@ const { sanitizeParam } = require('express-validator/filter');
 const { hashPassword, createJWT, checkPassword } = require('./auth');
 const db = require('../data/helpers');
 
-exports.validate = () => {
+exports.validateRegister = () => {
   return [
     sanitizeParam('username').customSanitizer(username => {
       return username.toLowerCase();
