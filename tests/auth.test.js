@@ -19,7 +19,7 @@ describe('Auth endpoints', () => {
   beforeEach(async () => {
     username.valid = helpers.generateUsername();
     username.existing = helpers.generateUsername();
-    await helpers.addUser(username.existing, password.valid);
+    await helpers.createUser(username.existing, password.valid);
   });
 
   describe('/api/login', () => {
@@ -70,8 +70,9 @@ describe('Auth endpoints', () => {
         .post('/api/login')
         .send({ username: username.existing, password: password.valid })
         .expect(res => {
-          expect(res.body.token).toBeDefined();
-          // TODO: validate token
+          const { token } = res.body;
+          expect(token).toBeDefined();
+          expect(helpers.validateToken(token, username.existing)).toBeTruthy();
         })
         .expect(200, done);
     });
@@ -173,8 +174,9 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.valid, password: password.valid })
         .expect(res => {
-          // TODO: validate token
-          expect(res.body.token).toBeDefined();
+          const { token } = res.body;
+          expect(token).toBeDefined();
+          expect(helpers.validateToken(token, username.valid)).toBeTruthy();
         })
         .expect(201, done);
     });
