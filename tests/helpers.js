@@ -43,3 +43,7 @@ exports.restartDb = async () => {
 };
 
 exports.sendVote = db.votes.vote;
+
+exports.createComment = async (authorId, postId, comment) => {
+  return await db.comments.add({ authorId, postId, comment });
+};

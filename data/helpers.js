@@ -59,7 +59,8 @@ exports.posts = {
       .where({ 'posts.id': id })
       .first();
   },
-  delete: id => {
+  delete: async id => {
+    await exports.comments.deleteCommentsByPost(id);
     return db('posts')
       .where({ id })
       .del();
@@ -93,6 +94,11 @@ exports.comments = {
   deleteComment: id => {
     return db('comments')
       .where({ id })
+      .del();
+  },
+  deleteCommentsByPost: postId => {
+    return db('comments')
+      .where({ postId })
       .del();
   }
 };
