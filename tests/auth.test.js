@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../app');
-const helpers = require('./helpers');
+const { restartDb, newUsername, createUser, verifyJWT } = require('./helpers');
 
 describe('Auth endpoints', () => {
   const username = {
@@ -16,10 +16,14 @@ describe('Auth endpoints', () => {
     noUppercase: 'r4andompassword'
   };
 
+  beforeAll(async () => {
+    await restartDb();
+  });
+
   beforeEach(async () => {
-    username.valid = helpers.generateUsername();
-    username.existing = helpers.generateUsername();
-    await helpers.createUser(username.existing, password.valid);
+    username.valid = newUsername();
+    username.existing = newUsername();
+    await createUser(username.existing, password.valid);
   });
 
   describe('/api/login', () => {
@@ -29,7 +33,7 @@ describe('Auth endpoints', () => {
         .send()
         .expect(res => {
           res.body.errors.forEach(err => {
-            expect(err.msg).toContain('Must include credentials');
+            expect(err.msg).toMatch(/must include credentials/i);
           });
         })
         .expect(422, done);
@@ -40,7 +44,7 @@ describe('Auth endpoints', () => {
         .post('/api/login')
         .send({ username: username.existing })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('Must include credentials');
+          expect(res.body.errors[0].msg).toMatch(/must include credentials/i);
         })
         .expect(422, done);
     });
@@ -50,7 +54,7 @@ describe('Auth endpoints', () => {
         .post('/api/login')
         .send({ password: password.existing })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('Must include credentials');
+          expect(res.body.errors[0].msg).toMatch(/must include credentials/i);
         })
         .expect(422, done);
     });
@@ -60,7 +64,7 @@ describe('Auth endpoints', () => {
         .post('/api/login')
         .send({ username: username.existing, password: password.short })
         .expect(res => {
-          expect(res.body.message).toContain('Invalid password');
+          expect(res.body.message).toMatch(/invalid password/i);
         })
         .expect(401, done);
     });
@@ -72,7 +76,7 @@ describe('Auth endpoints', () => {
         .expect(res => {
           const { token } = res.body;
           expect(token).toBeDefined();
-          expect(helpers.validateToken(token, username.existing)).toBeTruthy();
+          expect(verifyJWT(token, username.existing)).toBeTruthy();
         })
         .expect(200, done);
     });
@@ -84,7 +88,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.invalid, password: password.valid })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('alphanumeric characters');
+          expect(res.body.errors[0].msg).toMatch(/alphanumeric characters/i);
         })
         .expect(422, done);
     });
@@ -94,7 +98,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.long, password: password.valid })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('between 3 and 24');
+          expect(res.body.errors[0].msg).toMatch(/between 3 and 24/i);
         })
         .expect(422, done);
     });
@@ -104,7 +108,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.short, password: password.valid })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('between 3 and 24');
+          expect(res.body.errors[0].msg).toMatch(/between 3 and 24/i);
         })
         .expect(422, done);
     });
@@ -114,7 +118,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.existing, password: password.valid })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('Username taken');
+          expect(res.body.errors[0].msg).toMatch(/username taken/i);
         })
         .expect(422, done);
     });
@@ -124,7 +128,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.valid })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('10 and 32 characters');
+          expect(res.body.errors[0].msg).toMatch(/10 and 32 characters/i);
         })
         .expect(422, done);
     });
@@ -134,7 +138,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.valid, password: password.short })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('10 and 32 characters');
+          expect(res.body.errors[0].msg).toMatch(/10 and 32 characters/i);
         })
         .expect(422, done);
     });
@@ -144,7 +148,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.valid, password: password.long })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('10 and 32 characters');
+          expect(res.body.errors[0].msg).toMatch(/10 and 32 characters/i);
         })
         .expect(422, done);
     });
@@ -154,7 +158,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.valid, password: password.noUppercase })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('Must include at least');
+          expect(res.body.errors[0].msg).toMatch(/must include at least/i);
         })
         .expect(422, done);
     });
@@ -164,7 +168,7 @@ describe('Auth endpoints', () => {
         .post('/api/register')
         .send({ username: username.valid, password: password.noDigits })
         .expect(res => {
-          expect(res.body.errors[0].msg).toContain('Must include at least');
+          expect(res.body.errors[0].msg).toMatch(/must include at least/i);
         })
         .expect(422, done);
     });
@@ -176,7 +180,7 @@ describe('Auth endpoints', () => {
         .expect(res => {
           const { token } = res.body;
           expect(token).toBeDefined();
-          expect(helpers.validateToken(token, username.valid)).toBeTruthy();
+          expect(verifyJWT(token, username.valid)).toBeTruthy();
         })
         .expect(201, done);
     });

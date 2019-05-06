@@ -125,3 +125,12 @@ exports.votes = {
       .first();
   }
 };
+
+exports.all = {
+  migrate: async () => {
+    return await db.migrate.latest();
+  },
+  empty: async () => {
+    await db.raw('TRUNCATE TABLE users, posts, comments, votes CASCADE ');
+  }
+};

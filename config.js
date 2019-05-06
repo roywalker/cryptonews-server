@@ -18,6 +18,9 @@ module.exports = {
       client: 'pg',
       connection:
         process.env.DATABASE_TEST_URL || 'postgres://localhost/cryptonews_test',
+      migrations: {
+        directory: './data/migrations'
+      },
       useNullAsDefault: true
     }
   },
@@ -28,6 +31,9 @@ module.exports = {
   },
   logger: winston
 };
+
+if (process.env.NODE_ENV === 'test')
+  module.exports.db.env = module.exports.db.test;
 
 winston.add(
   new winston.transports.Console({

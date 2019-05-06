@@ -16,9 +16,9 @@ exports.createJWT = (id, username) => {
   });
 };
 
-exports.verifyJWT = (token, secret) => {
+exports.verifyJWT = token => {
   try {
-    return jwt.verify(token, secret);
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
     return false;
   }
@@ -28,7 +28,7 @@ exports.tokenAuth = (req, res, next) => {
   if (!req.headers.token)
     return res.status(401).json({ error: 'Access denied (no token found).' });
 
-  const decoded = this.verifyJWT(req.headers.token, process.env.JWT_SECRET);
+  const decoded = this.verifyJWT(req.headers.token);
   if (!decoded)
     return res.status(401).json({ error: 'Access denied (invalid token).' });
 

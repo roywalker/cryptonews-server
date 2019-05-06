@@ -10,7 +10,6 @@
     "dev": "nodemon app.js",
     "db:migrate": "knex migrate:latest --knexfile=./data/knex/knexfile.js",
     "db:seed": "knex seed:run --knexfile=./data/knex/knexfile.js",
-    "db_test:migrate": "knex migrate:latest --knexfile=./data/knex/knexfile_test.js",
     "test": "NODE_ENV=test jest --watchAll"
   },
   "dependencies": {

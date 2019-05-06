@@ -56,7 +56,7 @@ exports.add = async (req, res) => {
     title: req.body.title,
     url: req.body.url,
     authorId: req.user.id,
-    localUrl: urlSlug(req.body.title) + '-' + nanoid('1234567890abcdef', 12)
+    localUrl: this.generateSlug(req.body.title)
   });
 
   res.status(201).json(post);
@@ -70,4 +70,8 @@ exports.delete = async (req, res) => {
 exports.vote = async (req, res) => {
   const votes = await db.votes.vote(req.user.id, req.post.id, null);
   res.json({ upvotes: votes.count });
+};
+
+exports.generateSlug = title => {
+  return urlSlug(title) + '-' + nanoid('1234567890abcdef', 12);
 };
