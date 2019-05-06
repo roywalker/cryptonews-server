@@ -1,22 +1,17 @@
 const request = require('supertest');
 const app = require('../app');
-const { restartDb, newUsername, createPost, createUser } = require('./helpers');
+const { restartDb, createPost, createUser, sendVote } = require('./helpers');
 
 describe('Post endpoints', () => {
-  const post = {
-    title: {
-      valid: 'abcde',
-      short: 'a',
-      long: 'a'.repeat(200)
-    },
-    url: {
-      valid: 'http://a.com',
-      invalid: 'a'
-    }
+  let user1, user2, post1, post2;
+  const title = {
+    valid: 'abcde',
+    short: 'a',
+    long: 'a'.repeat(200)
   };
-
-  const user = {
-    password: 'v4alidPassword'
+  const url = {
+    valid: 'http://a.com',
+    invalid: 'a'
   };
 
   beforeAll(async () => {
@@ -24,9 +19,10 @@ describe('Post endpoints', () => {
   });
 
   beforeEach(async () => {
-    user.username = newUsername();
-    [user.id] = await createUser(user.username, user.password);
-    [post.id] = await createPost(post.title.valid, post.url.valid, user.id);
+    user1 = await createUser();
+    user2 = await createUser();
+    [post1] = await createPost(title.valid, url.valid, user1.id);
+    [post2] = await createPost(title.valid, url.valid, user2.id);
   });
 
   describe('Unsecure endpoints', () => {
@@ -42,10 +38,10 @@ describe('Post endpoints', () => {
 
     test('returns a single post', done => {
       request(app)
-        .get(`/api/post/${post.id.id}`)
+        .get(`/api/post/${post1.id}`)
         .expect(res => {
-          expect(res.body.title).toBe(post.title.valid);
-          expect(res.body.url).toBe(post.url.valid);
+          expect(res.body.title).toBe(title.valid);
+          expect(res.body.url).toBe(url.valid);
         })
         .expect(200, done);
     });
@@ -57,14 +53,14 @@ describe('Post endpoints', () => {
     beforeEach(async () => {
       const res = await request(app)
         .post('/api/login')
-        .send(user);
+        .send(user1);
       token = res.body.token;
     });
 
     test('reject requests without auth token', done => {
       request(app)
         .post('/api/post')
-        .send({ title: post.title.valid, url: post.url.valid })
+        .send({ title: title.valid, url: url.valid })
         .expect(401, done);
     });
 
@@ -75,7 +71,7 @@ describe('Post endpoints', () => {
         .send()
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/5 and 128 characters/i);
-          expect(res.body.errors[1].msg).toMatch(/invalid url/i);
+          expect(res.body.errors[1].msg).toMatch(/must include an url/i);
         })
         .expect(422, done);
     });
@@ -84,7 +80,10 @@ describe('Post endpoints', () => {
       request(app)
         .post('/api/post')
         .set('token', token)
-        .send({ url: post.url.valid })
+        .send({ url: url.valid })
+        .expect(res => {
+          expect(res.body.errors[0].msg).toMatch(/5 and 128 characters/i);
+        })
         .expect(422, done);
     });
 
@@ -92,7 +91,10 @@ describe('Post endpoints', () => {
       request(app)
         .post('/api/post')
         .set('token', token)
-        .send({ title: post.title.valid })
+        .send({ title: title.valid })
+        .expect(res => {
+          expect(res.body.errors[0].msg).toMatch(/must include an url/i);
+        })
         .expect(422, done);
     });
 
@@ -100,7 +102,10 @@ describe('Post endpoints', () => {
       request(app)
         .post('/api/post')
         .set('token', token)
-        .send({ title: post.title.short, url: post.url.valid })
+        .send({ title: title.short, url: url.valid })
+        .expect(res => {
+          expect(res.body.errors[0].msg).toMatch(/5 and 128 characters/i);
+        })
         .expect(422, done);
     });
 
@@ -108,7 +113,10 @@ describe('Post endpoints', () => {
       request(app)
         .post('/api/post')
         .set('token', token)
-        .send({ title: post.title.long, url: post.url.valid })
+        .send({ title: title.long, url: url.valid })
+        .expect(res => {
+          expect(res.body.errors[0].msg).toMatch(/5 and 128 characters/i);
+        })
         .expect(422, done);
     });
 
@@ -116,8 +124,53 @@ describe('Post endpoints', () => {
       request(app)
         .post('/api/post')
         .set('token', token)
-        .send({ title: post.title.valid, url: post.url.invalid })
+        .send({ title: title.valid, url: url.invalid })
+        .expect(res => {
+          expect(res.body.errors[0].msg).toMatch(/invalid url/i);
+        })
         .expect(422, done);
+    });
+
+    test('register a positive vote', done => {
+      request(app)
+        .post(`/api/post/${post1.id}/vote`)
+        .set('token', token)
+        .send()
+        .expect(res => {
+          expect(res.body.upvotes).toBe(1);
+        })
+        .expect(200, done);
+    });
+
+    test('register a negative vote', done => {
+      sendVote(user1.id, post1.id);
+      request(app)
+        .post(`/api/post/${post1.id}/vote`)
+        .set('token', token)
+        .send()
+        .expect(res => {
+          expect(res.body.upvotes).toBe(0);
+        })
+        .expect(200, done);
+    });
+
+    test('delete a post', done => {
+      request(app)
+        .delete(`/api/post/${post1.id}`)
+        .set('token', token)
+        .send()
+        .expect(204, done);
+    });
+
+    test('reject requests without ownership auth', async done => {
+      request(app)
+        .delete(`/api/post/${post2.id}`)
+        .set('token', token)
+        .send()
+        .expect(res => {
+          expect(res.body.message).toMatch(/can't delete/i);
+        })
+        .expect(401, done);
     });
   });
 });

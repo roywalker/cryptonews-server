@@ -3,13 +3,14 @@ const app = require('../app');
 const { restartDb, newUsername, createUser, verifyJWT } = require('./helpers');
 
 describe('Auth endpoints', () => {
+  let user1;
   const username = {
     short: 'a',
     long: 'a'.repeat(50),
     invalid: 'a@!#$'
   };
   const password = {
-    valid: 'r4ndomPassword',
+    valid: 'v4lidPassword',
     short: 'abc',
     long: 'a'.repeat(50),
     noDigits: 'randomPassword',
@@ -21,9 +22,8 @@ describe('Auth endpoints', () => {
   });
 
   beforeEach(async () => {
-    username.valid = newUsername();
-    username.existing = newUsername();
-    await createUser(username.existing, password.valid);
+    username.available = newUsername();
+    user1 = await createUser();
   });
 
   describe('/api/login', () => {
@@ -42,7 +42,7 @@ describe('Auth endpoints', () => {
     test('rejects requests with blank password', done => {
       request(app)
         .post('/api/login')
-        .send({ username: username.existing })
+        .send({ username: user1.username })
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/must include credentials/i);
         })
@@ -52,7 +52,7 @@ describe('Auth endpoints', () => {
     test('rejects requests with blank username', done => {
       request(app)
         .post('/api/login')
-        .send({ password: password.existing })
+        .send({ password: password.valid })
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/must include credentials/i);
         })
@@ -62,7 +62,7 @@ describe('Auth endpoints', () => {
     test('rejects requests with incorrect password', done => {
       request(app)
         .post('/api/login')
-        .send({ username: username.existing, password: password.short })
+        .send({ username: user1.username, password: password.short })
         .expect(res => {
           expect(res.body.message).toMatch(/invalid password/i);
         })
@@ -72,11 +72,11 @@ describe('Auth endpoints', () => {
     test('returns a valid auth token', done => {
       request(app)
         .post('/api/login')
-        .send({ username: username.existing, password: password.valid })
+        .send({ username: user1.username, password: password.valid })
         .expect(res => {
           const { token } = res.body;
           expect(token).toBeDefined();
-          expect(verifyJWT(token, username.existing)).toBeTruthy();
+          expect(verifyJWT(token, user1.username)).toBeTruthy();
         })
         .expect(200, done);
     });
@@ -116,7 +116,7 @@ describe('Auth endpoints', () => {
     test('rejects requests when username is taken', done => {
       request(app)
         .post('/api/register')
-        .send({ username: username.existing, password: password.valid })
+        .send({ username: user1.username, password: password.valid })
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/username taken/i);
         })
@@ -126,7 +126,7 @@ describe('Auth endpoints', () => {
     test('rejects requests with blank password', done => {
       request(app)
         .post('/api/register')
-        .send({ username: username.valid })
+        .send({ username: username.available })
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/10 and 32 characters/i);
         })
@@ -136,7 +136,7 @@ describe('Auth endpoints', () => {
     test('rejects requests with short password', done => {
       request(app)
         .post('/api/register')
-        .send({ username: username.valid, password: password.short })
+        .send({ username: username.available, password: password.short })
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/10 and 32 characters/i);
         })
@@ -146,7 +146,7 @@ describe('Auth endpoints', () => {
     test('rejects requests with long password', done => {
       request(app)
         .post('/api/register')
-        .send({ username: username.valid, password: password.long })
+        .send({ username: username.available, password: password.long })
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/10 and 32 characters/i);
         })
@@ -156,7 +156,7 @@ describe('Auth endpoints', () => {
     test('rejects requests with password without uppercase letters', done => {
       request(app)
         .post('/api/register')
-        .send({ username: username.valid, password: password.noUppercase })
+        .send({ username: username.available, password: password.noUppercase })
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/must include at least/i);
         })
@@ -166,7 +166,7 @@ describe('Auth endpoints', () => {
     test('rejects requests with password without digits', done => {
       request(app)
         .post('/api/register')
-        .send({ username: username.valid, password: password.noDigits })
+        .send({ username: username.available, password: password.noDigits })
         .expect(res => {
           expect(res.body.errors[0].msg).toMatch(/must include at least/i);
         })
@@ -176,11 +176,11 @@ describe('Auth endpoints', () => {
     it('creates a new user and returns auth token', done => {
       request(app)
         .post('/api/register')
-        .send({ username: username.valid, password: password.valid })
+        .send({ username: username.available, password: password.valid })
         .expect(res => {
           const { token } = res.body;
           expect(token).toBeDefined();
-          expect(verifyJWT(token, username.valid)).toBeTruthy();
+          expect(verifyJWT(token, username.available)).toBeTruthy();
         })
         .expect(201, done);
     });

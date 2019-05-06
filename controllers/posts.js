@@ -12,6 +12,9 @@ exports.validate = () => {
       .withMessage('Must contain between 5 and 128 characters.'),
 
     body('url')
+      .exists()
+      .withMessage('Must include an URL.')
+
       .isURL()
       .withMessage('Invalid URL.')
   ];
@@ -69,7 +72,7 @@ exports.delete = async (req, res) => {
 
 exports.vote = async (req, res) => {
   const votes = await db.votes.vote(req.user.id, req.post.id, null);
-  res.json({ upvotes: votes.count });
+  res.json({ upvotes: parseInt(votes.count) });
 };
 
 exports.generateSlug = title => {
