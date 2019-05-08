@@ -1,12 +1,6 @@
 const request = require('supertest');
 const app = require('../app');
-const {
-  restartDb,
-  createPost,
-  createUser,
-  sendVote,
-  createComment
-} = require('./helpers');
+const { cleanDb, create, vote } = require('./helpers');
 
 describe('Post endpoints', () => {
   let user1, user2, post1, post2, comment1;
@@ -25,15 +19,15 @@ describe('Post endpoints', () => {
   };
 
   beforeAll(async () => {
-    await restartDb();
+    await cleanDb();
   });
 
   beforeEach(async () => {
-    user1 = await createUser();
-    user2 = await createUser();
-    [post1] = await createPost(title.valid, url.valid, user1.id);
-    [post2] = await createPost(title.valid, url.valid, user2.id);
-    comment1 = await createComment(user1.id, post1.id, comment.valid);
+    user1 = await create.user();
+    user2 = await create.user();
+    [post1] = await create.post(title.valid, url.valid, user1.id);
+    [post2] = await create.post(title.valid, url.valid, user2.id);
+    comment1 = await create.comment(user1.id, post1.id, comment.valid);
   });
 
   describe('Unsecure endpoints', () => {
@@ -154,7 +148,7 @@ describe('Post endpoints', () => {
     });
 
     test('removes vote to a post', async done => {
-      await sendVote(user1.id, post1.id, null);
+      await vote(user1.id, post1.id, null);
       request(app)
         .post(`/api/post/${post1.id}/vote`)
         .set('token', token)
@@ -241,7 +235,7 @@ describe('Post endpoints', () => {
       });
 
       test('removes vote to a comment', async done => {
-        await sendVote(user1.id, null, comment1.id);
+        await vote(user1.id, null, comment1.id);
         request(app)
           .post(`/api/post/${post1.id}/comments/${comment1.id}/vote`)
           .set('token', token)

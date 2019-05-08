@@ -1,5 +1,4 @@
 const { body, validationResult } = require('express-validator/check');
-const { sanitizeParam } = require('express-validator/filter');
 const { hashPassword, createJWT, checkPassword } = require('./auth');
 const db = require('../data/helpers');
 

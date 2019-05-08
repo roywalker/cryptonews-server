@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../app');
-const { restartDb, newUsername, createUser, verifyJWT } = require('./helpers');
+const { cleanDb, create, verifyJWT } = require('./helpers');
 
 describe('Auth endpoints', () => {
   let user1;
@@ -18,12 +18,12 @@ describe('Auth endpoints', () => {
   };
 
   beforeAll(async () => {
-    await restartDb();
+    await cleanDb();
   });
 
   beforeEach(async () => {
-    username.available = newUsername();
-    user1 = await createUser();
+    username.available = create.username();
+    user1 = await create.user();
   });
 
   describe('/api/login', () => {
