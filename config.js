@@ -7,10 +7,10 @@ module.exports = {
       client: 'pg',
       connection: process.env.DATABASE_URL || 'postgres://localhost/cryptonews',
       migrations: {
-        directory: './migrations'
+        directory: '../migrations'
       },
       seeds: {
-        directory: './seeds'
+        directory: '../seeds'
       },
       useNullAsDefault: true
     },
