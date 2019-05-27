@@ -30,33 +30,33 @@ exports.posts = {
   list: () => {
     return db('posts')
       .select(
+        'posts.localUrl as slug',
         'posts.id',
         'posts.title',
         'posts.url',
         'posts.date',
         'users.username as author',
-        'posts.localUrl',
         db.raw(`
           (SELECT COUNT(*) as votes FROM votes WHERE posts.id = votes."postId"),
           (SELECT COUNT(*) as comments FROM comments WHERE posts.id = comments."postId")`)
       )
       .join('users', { 'posts.authorId': 'users.id' });
   },
-  findById: id => {
+  find: slug => {
     return db('posts')
       .select(
+        'posts.localUrl as slug',
         'posts.id',
         'posts.title',
         'posts.url',
         'posts.date',
         'users.username as author',
-        'posts.localUrl',
         db.raw(
           '(SELECT COUNT(*) as votes FROM votes WHERE posts.id = votes."postId")'
         )
       )
       .join('users', { 'posts.authorId': 'users.id' })
-      .where({ 'posts.id': id })
+      .where({ 'posts.localUrl': slug })
       .first();
   },
   delete: async id => {
