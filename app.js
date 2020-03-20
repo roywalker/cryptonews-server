@@ -13,6 +13,6 @@ app.use(helmet());
 require('./routes')(app);
 
 if (require.main === module)
-  app.listen(config.port, () => console.log(`Listening...`));
+  app.listen(config.port, () => console.log(`Listening at http://localhost:${config.port}`));
 
 module.exports = app;
