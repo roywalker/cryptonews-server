@@ -41,9 +41,9 @@ describe('Post endpoints', () => {
         .expect(200, done);
     });
 
-    test('returns a single post', done => {
+    test('Returns a single post', done => {
       request(app)
-        .get(`/api/post/${post1.id}`)
+        .get(`/api/post/${post1.localUrl}`)
         .expect(res => {
           expect(res.body.title).toBe(title.valid);
           expect(res.body.url).toBe(url.valid);
@@ -138,7 +138,7 @@ describe('Post endpoints', () => {
 
     test('adds vote to a post', done => {
       request(app)
-        .post(`/api/post/${post1.id}/vote`)
+        .post(`/api/post/${post1.localUrl}/vote`)
         .set('token', token)
         .send()
         .expect(res => {
@@ -150,7 +150,7 @@ describe('Post endpoints', () => {
     test('removes vote to a post', async done => {
       await vote(user1.id, post1.id, null);
       request(app)
-        .post(`/api/post/${post1.id}/vote`)
+        .post(`/api/post/${post1.localUrl}/vote`)
         .set('token', token)
         .send()
         .expect(res => {
@@ -161,7 +161,7 @@ describe('Post endpoints', () => {
 
     test('deletes a post', done => {
       request(app)
-        .delete(`/api/post/${post1.id}`)
+        .delete(`/api/post/${post1.localUrl}`)
         .set('token', token)
         .send()
         .expect(204, done);
@@ -169,7 +169,7 @@ describe('Post endpoints', () => {
 
     test('rejects requests without ownership auth', async done => {
       request(app)
-        .delete(`/api/post/${post2.id}`)
+        .delete(`/api/post/${post2.localUrl}`)
         .set('token', token)
         .send()
         .expect(res => {
@@ -181,7 +181,7 @@ describe('Post endpoints', () => {
     describe('Comments endpoints', () => {
       test('rejects requests with blank comment', done => {
         request(app)
-          .post(`/api/post/${post1.id}/comments`)
+          .post(`/api/post/${post1.localUrl}/comments`)
           .set('token', token)
           .send()
           .expect(res => {
@@ -192,7 +192,7 @@ describe('Post endpoints', () => {
 
       test('rejects requests with long comment', done => {
         request(app)
-          .post(`/api/post/${post1.id}/comments`)
+          .post(`/api/post/${post1.localUrl}/comments`)
           .set('token', token)
           .send({ comment: comment.long })
           .expect(res => {
@@ -203,7 +203,7 @@ describe('Post endpoints', () => {
 
       test('rejects requests associated with inexistent posts', done => {
         request(app)
-          .post(`/api/post/${post2.id + 1}/comments`)
+          .post(`/api/post/${post2.localUrl + 1}/comments`)
           .set('token', token)
           .send({ comment: comment.long })
           .expect(res => {
@@ -214,7 +214,7 @@ describe('Post endpoints', () => {
 
       test('creates a new comment', done => {
         request(app)
-          .post(`/api/post/${post1.id}/comments`)
+          .post(`/api/post/${post1.localUrl}/comments`)
           .set('token', token)
           .send({ comment: comment.valid })
           .expect(res => {
@@ -225,7 +225,7 @@ describe('Post endpoints', () => {
 
       test('adds vote to a comment', done => {
         request(app)
-          .post(`/api/post/${post1.id}/comments/${comment1.id}/vote`)
+          .post(`/api/post/${post1.localUrl}/comments/${comment1.id}/vote`)
           .set('token', token)
           .send()
           .expect(res => {
@@ -237,7 +237,7 @@ describe('Post endpoints', () => {
       test('removes vote to a comment', async done => {
         await vote(user1.id, null, comment1.id);
         request(app)
-          .post(`/api/post/${post1.id}/comments/${comment1.id}/vote`)
+          .post(`/api/post/${post1.localUrl}/comments/${comment1.id}/vote`)
           .set('token', token)
           .send()
           .expect(res => {
@@ -248,7 +248,7 @@ describe('Post endpoints', () => {
 
       test('deletes a comment', done => {
         request(app)
-          .delete(`/api/post/${post1.id}/comments/${comment1.id}/`)
+          .delete(`/api/post/${post1.localUrl}/comments/${comment1.id}/`)
           .set('token', token)
           .send()
           .expect(204, done);
