@@ -5,7 +5,7 @@ module.exports = {
   db: {
     env: {
       client: 'pg',
-      connection: process.env.DATABASE_URL || 'postgres://localhost/cryptonews',
+      connection: process.env.DATABASE_URL,
       migrations: {
         directory: '../migrations'
       },
@@ -16,8 +16,7 @@ module.exports = {
     },
     test: {
       client: 'pg',
-      connection:
-        process.env.DATABASE_TEST_URL || 'postgres://localhost/cryptonews_test',
+      connection: process.env.DATABASE_TEST_URL,
       migrations: {
         directory: './data/migrations'
       },
